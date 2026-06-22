@@ -5,7 +5,7 @@
  * filtering, sorting, and mark-read / archive interactions. Client-side state
  * over mock data; the operations map to future markRead / archive API calls.
  */
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   CATEGORY_LABEL,
   SEVERITY_LABEL,
@@ -23,6 +23,8 @@ import { IconInbox, IconArchive, IconCheck, IconBell } from "@/components/ui/ico
 type Tab = "inbox" | "archived";
 type Sort = "recent" | "severity";
 type SevFilter = Severity | "all";
+
+const DISMISSED_KEY = "lwi-alerts-dismissed";
 
 export function AlertsClient({ seed }: { seed: Alert[] }) {
   const [alerts, setAlerts] = useState<Alert[]>(() => seed.map((a) => ({ ...a })));
@@ -54,9 +56,34 @@ export function AlertsClient({ seed }: { seed: Alert[] }) {
     );
   }, [alerts, tab, sev, category, sort]);
 
+  // Permanently dismissed alerts persist in the browser, so deletions survive
+  // reloads even though the alert list is regenerated server-side each visit.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DISMISSED_KEY);
+      if (raw) {
+        const dismissed = new Set<string>(JSON.parse(raw));
+        if (dismissed.size) setAlerts((p) => p.filter((a) => !dismissed.has(a.id)));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const markRead = (id: string) => setAlerts((p) => p.map((a) => (a.id === id ? { ...a, read: true } : a)));
   const archive = (id: string) => setAlerts((p) => p.map((a) => (a.id === id ? { ...a, archived: true, read: true } : a)));
   const markAllRead = () => setAlerts((p) => p.map((a) => (a.archived ? a : { ...a, read: true })));
+  const deleteAlert = (id: string) => {
+    setAlerts((p) => p.filter((a) => a.id !== id));
+    try {
+      const raw = localStorage.getItem(DISMISSED_KEY);
+      const set = new Set<string>(raw ? JSON.parse(raw) : []);
+      set.add(id);
+      localStorage.setItem(DISMISSED_KEY, JSON.stringify([...set]));
+    } catch {
+      /* ignore */
+    }
+  };
 
   const categories: (AlertCategory | "all")[] = ["all", "drift", "concentration", "risk", "price", "earnings", "watchlist", "rebalance"];
   const sevFilters: SevFilter[] = ["all", "critical", "caution", "info"];
@@ -153,7 +180,7 @@ export function AlertsClient({ seed }: { seed: Alert[] }) {
         ) : (
           <ul>
             {list.map((a) => (
-              <AlertRow key={a.id} alert={a} onRead={markRead} onArchive={archive} archivedView={tab === "archived"} />
+              <AlertRow key={a.id} alert={a} onRead={markRead} onArchive={archive} onDelete={deleteAlert} archivedView={tab === "archived"} />
             ))}
           </ul>
         )}

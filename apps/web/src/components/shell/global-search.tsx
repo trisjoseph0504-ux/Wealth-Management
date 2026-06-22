@@ -54,7 +54,7 @@ export function GlobalSearch({ className }: { className?: string }) {
 
   function go(symbol: string) {
     setOpen(false);
-    setQuery("");
+    setQuery(symbol); // keep the bar populated with the selected ticker
     setResults([]);
     inputRef.current?.blur();
     router.push(`/security/${encodeURIComponent(symbol)}`);

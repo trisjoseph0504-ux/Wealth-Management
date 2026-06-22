@@ -6,17 +6,19 @@ import { type Alert, CATEGORY_LABEL } from "@/data/alerts-mock";
 import { cn } from "@/lib/cn";
 import { TickerLink } from "@/components/ui/ticker-link";
 import { SEVERITY_META, categoryIcon } from "@/components/alerts/alert-meta";
-import { IconCheck, IconArchive, IconChevronRight } from "@/components/ui/icons";
+import { IconCheck, IconArchive, IconTrash, IconChevronRight } from "@/components/ui/icons";
 
 export function AlertRow({
   alert,
   onRead,
   onArchive,
+  onDelete,
   archivedView = false,
 }: {
   alert: Alert;
   onRead: (id: string) => void;
   onArchive: (id: string) => void;
+  onDelete: (id: string) => void;
   archivedView?: boolean;
 }) {
   const sev = SEVERITY_META[alert.severity];
@@ -81,19 +83,19 @@ export function AlertRow({
       </div>
 
       {/* Row actions */}
-      {!archivedView && (
-        <div className="flex shrink-0 items-start gap-1">
-          {!alert.read && (
-            <button
-              type="button"
-              onClick={() => onRead(alert.id)}
-              aria-label="Mark as read"
-              title="Mark as read"
-              className="reduce-motion-safe flex size-7 items-center justify-center rounded-[4px] text-fg-subtle transition hover:bg-surface-2 hover:text-emerald"
-            >
-              <IconCheck size={15} />
-            </button>
-          )}
+      <div className="flex shrink-0 items-start gap-1">
+        {!archivedView && !alert.read && (
+          <button
+            type="button"
+            onClick={() => onRead(alert.id)}
+            aria-label="Mark as read"
+            title="Mark as read"
+            className="reduce-motion-safe flex size-7 items-center justify-center rounded-[4px] text-fg-subtle transition hover:bg-surface-2 hover:text-emerald"
+          >
+            <IconCheck size={15} />
+          </button>
+        )}
+        {!archivedView && (
           <button
             type="button"
             onClick={() => onArchive(alert.id)}
@@ -103,8 +105,17 @@ export function AlertRow({
           >
             <IconArchive size={15} />
           </button>
-        </div>
-      )}
+        )}
+        <button
+          type="button"
+          onClick={() => onDelete(alert.id)}
+          aria-label="Delete permanently"
+          title="Delete permanently"
+          className="reduce-motion-safe flex size-7 items-center justify-center rounded-[4px] text-fg-subtle transition hover:bg-surface-2 hover:text-neg"
+        >
+          <IconTrash size={15} />
+        </button>
+      </div>
     </li>
   );
 }
