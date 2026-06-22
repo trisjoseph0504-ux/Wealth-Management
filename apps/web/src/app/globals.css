@@ -1,0 +1,221 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Lewis Wealth Intelligence — Design Tokens (themeable)
+   See docs/DESIGN_SYSTEM.md §2/§10.
+
+   Architecture (so light mode can be added later WITHOUT touching components):
+     1. Semantic CSS variables are defined per THEME scope below
+        (`:root` / [data-theme="dark"] = default; [data-theme="light"] = scaffold).
+     2. `@theme` maps Tailwind color utilities → those semantic variables, so
+        `bg-surface`, `text-fg`, … resolve through the active theme at the use
+        site. Switching the theme is a `data-theme` attribute change — no CSS or
+        component rewrites.
+
+   Dark is the primary brand experience. The light palette below is a structural
+   scaffold (functional, not yet design-polished) — refine in a later phase.
+   No gold / no yellow in either theme; caution is a cool slate-cyan.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* 1a. Semantic tokens — DARK (default) */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg-base: #07090a;
+  --bg-canvas: #0b0f11;
+  --bg-surface: #121719;
+  --bg-surface-2: #181f22;
+  --bg-inset: #0e1315;
+
+  --border-hairline: #1e262a;
+  --border-line-strong: #2a353a;
+
+  --fg: #e8edec;
+  --fg-muted: #9ba8a6;
+  --fg-subtle: #6b7976;
+
+  --emerald: #10b981;
+  --emerald-bright: #5ee9b5;
+  --emerald-deep: #059669;
+  --emerald-50: #e6f7ef;
+
+  --pos: #10b981;
+  --neg: #f2555a;
+  --caution: #5ba6b5;
+  --info: #6e8ba8;
+  --flat: #9ba8a6;
+  /* `warn` is a FUNCTIONAL risk-severity color (muted amber-orange), a deliberate
+     exception to the no-yellow brand rule, used only for risk signaling — never
+     decoration. Severity ramp: ok → caution (cool) → warn (amber) → neg (red). */
+  --warn: #d98c4a;
+
+  /* Derived / contextual */
+  --accent-contrast: #04130d; /* text/icon on emerald fills */
+  --pos-soft: rgba(16, 185, 129, 0.12);
+  --neg-soft: rgba(242, 85, 90, 0.12);
+  --warn-soft: rgba(217, 140, 74, 0.14);
+  --canvas-glow: rgba(16, 185, 129, 0.05);
+  --selection: rgba(16, 185, 129, 0.22);
+  --shadow-elevation: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
+}
+
+/* 1b. Semantic tokens — LIGHT (premium scaffold; structure only for now) */
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-base: #eef1f0;
+  --bg-canvas: #f7f9f8;
+  --bg-surface: #ffffff;
+  --bg-surface-2: #f1f4f3;
+  --bg-inset: #f4f7f6;
+
+  --border-hairline: #e2e8e6;
+  --border-line-strong: #cbd5d2;
+
+  --fg: #0b1311;
+  --fg-muted: #47534f;
+  --fg-subtle: #6b7672;
+
+  --emerald: #059669;
+  --emerald-bright: #047857;
+  --emerald-deep: #065f46;
+  --emerald-50: #064e3b;
+
+  --pos: #059669;
+  --neg: #dc2f36;
+  --caution: #3f8794;
+  --info: #4f6c8a;
+  --flat: #6b7672;
+  --warn: #b9701f;
+
+  --accent-contrast: #ffffff;
+  --pos-soft: rgba(5, 150, 105, 0.1);
+  --neg-soft: rgba(220, 47, 54, 0.1);
+  --warn-soft: rgba(185, 112, 31, 0.12);
+  --canvas-glow: rgba(5, 150, 105, 0.06);
+  --selection: rgba(5, 150, 105, 0.18);
+  --shadow-elevation: 0 18px 40px -28px rgba(15, 40, 30, 0.25);
+}
+
+/* 2. Map semantic tokens → Tailwind color utilities + type/radius scale.
+   Values reference the semantic vars, so utilities follow the active theme. */
+@theme {
+  --color-base: var(--bg-base);
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-surface-2);
+  --color-inset: var(--bg-inset);
+
+  --color-hairline: var(--border-hairline);
+  --color-line-strong: var(--border-line-strong);
+
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+
+  --color-emerald: var(--emerald);
+  --color-emerald-bright: var(--emerald-bright);
+  --color-emerald-deep: var(--emerald-deep);
+  --color-emerald-50: var(--emerald-50);
+
+  --color-pos: var(--pos);
+  --color-neg: var(--neg);
+  --color-caution: var(--caution);
+  --color-info: var(--info);
+  --color-flat: var(--flat);
+  --color-warn: var(--warn);
+  --color-accent-contrast: var(--accent-contrast);
+
+  /* Typography — premium stacks; robust fallbacks if files aren't present. */
+  --font-sans:
+    "Satoshi", "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:
+    "Geist Mono", "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Mono",
+    Menlo, Consolas, monospace;
+  --font-serif: "Newsreader", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+
+  --radius-control: 4px;
+  --radius-card: 8px;
+}
+
+/* 3. Base layer */
+@layer base {
+  * {
+    border-color: var(--color-hairline);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv01";
+  }
+
+  /* Faint top-down luxe wash on the app canvas (theme-aware glow). */
+  .app-canvas {
+    background:
+      radial-gradient(
+        1200px 600px at 18% -10%,
+        var(--canvas-glow),
+        transparent 60%
+      ),
+      var(--color-base);
+  }
+
+  ::selection {
+    background: var(--selection);
+    color: var(--color-fg);
+  }
+
+  /* Slim, on-brand scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+/* 4. Custom utilities (Tailwind v4 `@utility`) */
+
+/* All financial figures: tabular figures, no font wobble between digits. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  letter-spacing: -0.01em;
+}
+
+/* Hairline inset frame used in the institutional "terminal" framing. */
+@utility ring-hairline {
+  box-shadow: inset 0 0 0 1px var(--color-hairline);
+}
+
+/* Standard restrained transition for interactive surfaces. */
+@utility reduce-motion-safe {
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

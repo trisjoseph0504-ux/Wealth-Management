@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "LWI base",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "declaration": true,
+    "sourceMap": true,
+    "paths": {
+      "@lwi/ui": ["./packages/ui/src"],
+      "@lwi/ui/*": ["./packages/ui/src/*"],
+      "@lwi/types": ["./packages/types/src"],
+      "@lwi/utils": ["./packages/utils/src"],
+      "@lwi/utils/*": ["./packages/utils/src/*"],
+      "@lwi/db": ["./packages/db/src"]
+    }
+  }
+}
