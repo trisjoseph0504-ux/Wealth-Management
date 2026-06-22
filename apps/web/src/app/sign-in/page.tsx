@@ -33,7 +33,7 @@ export default async function SignInPage({
           </span>
           <div>
             <h1 className="text-xl font-semibold tracking-tight text-fg">Lewis Wealth Intelligence</h1>
-            <p className="mt-1 text-[12.5px] text-fg-subtle">Private wealth · institutional intelligence</p>
+            <p className="mt-1 text-[12.5px] text-fg-subtle">Institutional Intelligence Platform</p>
           </div>
         </div>
 
