@@ -4,8 +4,10 @@
  */
 import { getPreferencesAction } from "@/server/actions/preferences";
 import { getCurrentUser } from "@/server/auth/current-user";
+import { gateLogoutAction } from "@/server/actions/gate";
 import { SettingsClient } from "@/components/settings/settings-client";
-import { SectionLabel } from "@/components/ui/primitives";
+import { Card } from "@/components/ui/card";
+import { Button, SectionLabel } from "@/components/ui/primitives";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,22 @@ export default async function SettingsPage() {
       </div>
 
       <SettingsClient prefs={prefs} user={{ name: user.name, email: user.email }} />
+
+      {process.env.SITE_PASSWORD && (
+        <Card>
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+            <div>
+              <h2 className="text-sm font-semibold tracking-tight text-fg">Session</h2>
+              <p className="mt-0.5 text-[12px] text-fg-subtle">Sign out — you'll need the site password to return.</p>
+            </div>
+            <form action={gateLogoutAction}>
+              <Button type="submit" variant="outline">
+                Sign out
+              </Button>
+            </form>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

@@ -17,6 +17,9 @@ const schema = z.object({
   MARKET_DATA_PROVIDER: z.enum(["mock", "finnhub"]).default("mock"),
   /** Required only when MARKET_DATA_PROVIDER=finnhub. Server-only. */
   FINNHUB_API_KEY: z.string().min(1).optional(),
+  /** Optional site password. When set, the whole app is gated behind it; when
+   *  unset (e.g. local dev), the app is open. */
+  SITE_PASSWORD: z.string().min(1).optional(),
 });
 
 const parsed = schema.parse({
@@ -25,6 +28,7 @@ const parsed = schema.parse({
   DATABASE_URL: process.env.DATABASE_URL,
   MARKET_DATA_PROVIDER: process.env.MARKET_DATA_PROVIDER,
   FINNHUB_API_KEY: process.env.FINNHUB_API_KEY,
+  SITE_PASSWORD: process.env.SITE_PASSWORD,
 });
 
 if (parsed.DATA_SOURCE === "db" && !parsed.DATABASE_URL) {
