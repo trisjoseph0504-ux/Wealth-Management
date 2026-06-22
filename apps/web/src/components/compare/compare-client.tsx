@@ -15,7 +15,7 @@ import { Money, Percent, ChangePill } from "@/components/ui/financial";
 import { EmptyState } from "@/components/ui/primitives";
 import { SymbolCombobox } from "@/components/ui/symbol-combobox";
 import { TickerLink } from "@/components/ui/ticker-link";
-import { IconGrid, IconTrash } from "@/components/ui/icons";
+import { IconGrid, IconTrash, IconCheck } from "@/components/ui/icons";
 
 interface Metric {
   label: string;
@@ -144,13 +144,28 @@ export function CompareClient({ initialCards }: { initialCards: CompareCard[] })
                   return (
                     <tr key={m.label} className="border-b border-hairline/60 last:border-0">
                       <td className="px-4 py-2.5 text-left text-[12px] text-fg-subtle">{m.label}</td>
-                      {cards.map((c) => (
-                        <td key={c.symbol} className="px-4 py-2.5 text-right">
-                          <span className={cn(winners.has(c.symbol) && "rounded-[3px] bg-emerald/10 px-1.5 py-0.5 font-semibold")}>
-                            {m.render(c)}
-                          </span>
-                        </td>
-                      ))}
+                      {cards.map((c) => {
+                        const winner = winners.has(c.symbol);
+                        return (
+                          <td
+                            key={c.symbol}
+                            className={cn(
+                              "px-4 py-2.5 text-right",
+                              winner && "bg-emerald/[0.14] shadow-[inset_2px_0_0_var(--color-emerald)]",
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "inline-flex items-center justify-end gap-1.5",
+                                winner && "font-semibold text-emerald-bright",
+                              )}
+                            >
+                              {winner && <IconCheck size={13} className="shrink-0 text-emerald" />}
+                              {m.render(c)}
+                            </span>
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
                 })}
