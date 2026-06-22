@@ -26,6 +26,9 @@ export interface CompareCard {
   perf1M: number;
   perfYTD: number;
   perf1Y: number;
+  thesis: string;
+  bull: string;
+  bear: string;
 }
 
 export async function compareSecurityAction(symbol: string): Promise<CompareCard | null> {
@@ -70,5 +73,8 @@ export async function compareSecurityAction(symbol: string): Promise<CompareCard
     perf1M: perf("1M"),
     perfYTD: perf("YTD"),
     perf1Y: perf("1Y"),
+    thesis: d.thesis,
+    bull: d.bull[0] ?? "",
+    bear: d.bear[0] ?? "",
   };
 }
