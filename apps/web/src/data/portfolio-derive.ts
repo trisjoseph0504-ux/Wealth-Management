@@ -49,23 +49,23 @@ export interface PortfolioView {
   summary: PortfolioSummary;
 }
 
-/** Current timestamp in US/Eastern (market time), e.g. "Jun 21, 2026 · 9:14 PM ET".
+/** Current timestamp in US/Central, e.g. "Jun 21, 2026 · 10:14 PM CT".
  *  Evaluated per request — callers are dynamic server components. */
 function currentAsOf(): string {
   const now = new Date();
   const date = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
+    timeZone: "America/Chicago",
     month: "short",
     day: "numeric",
     year: "numeric",
   }).format(now);
   const time = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/New_York",
+    timeZone: "America/Chicago",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
   }).format(now);
-  return `${date} · ${time} ET`;
+  return `${date} · ${time} CT`;
 }
 
 /** Infer the broad asset class for a security being added by symbol. */
