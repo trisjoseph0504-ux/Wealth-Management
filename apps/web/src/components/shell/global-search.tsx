@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { searchSecuritiesAction } from "@/server/actions/market";
 import type { SymbolHit, InstrumentType } from "@/server/market/types";
 import { cn } from "@/lib/cn";
-import { IconSearch } from "@/components/ui/icons";
+import { IconSearch, IconClose } from "@/components/ui/icons";
 
 const TYPE_BADGE: Record<InstrumentType, string> = {
   Stock: "border-hairline bg-inset text-fg-subtle",
@@ -60,6 +60,13 @@ export function GlobalSearch({ className }: { className?: string }) {
     router.push(`/security/${encodeURIComponent(symbol)}`);
   }
 
+  function clearSearch() {
+    setQuery("");
+    setResults([]);
+    setOpen(true);
+    inputRef.current?.focus();
+  }
+
   function onKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (!showDropdown) return;
     if (e.key === "ArrowDown") {
@@ -96,9 +103,24 @@ export function GlobalSearch({ className }: { className?: string }) {
           aria-label="Search securities"
           className="w-full min-w-0 bg-transparent text-[13px] text-fg placeholder:text-fg-subtle focus:outline-none"
         />
-        <kbd className="hidden shrink-0 rounded-[4px] border border-hairline bg-surface px-1.5 py-0.5 text-[10px] text-fg-subtle md:inline">
-          ⌘K
-        </kbd>
+        {query ? (
+          <button
+            type="button"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              clearSearch();
+            }}
+            aria-label="Clear search"
+            title="Clear"
+            className="reduce-motion-safe flex size-5 shrink-0 items-center justify-center rounded-[4px] text-fg-subtle transition hover:bg-surface hover:text-fg"
+          >
+            <IconClose size={14} />
+          </button>
+        ) : (
+          <kbd className="hidden shrink-0 rounded-[4px] border border-hairline bg-surface px-1.5 py-0.5 text-[10px] text-fg-subtle md:inline">
+            ⌘K
+          </kbd>
+        )}
       </label>
 
       {showDropdown && (
