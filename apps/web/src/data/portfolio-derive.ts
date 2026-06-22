@@ -49,6 +49,25 @@ export interface PortfolioView {
   summary: PortfolioSummary;
 }
 
+/** Current timestamp in US/Eastern (market time), e.g. "Jun 21, 2026 · 9:14 PM ET".
+ *  Evaluated per request — callers are dynamic server components. */
+function currentAsOf(): string {
+  const now = new Date();
+  const date = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(now);
+  const time = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(now);
+  return `${date} · ${time} ET`;
+}
+
 /** Infer the broad asset class for a security being added by symbol. */
 export function inferAssetClass(sec: Security | undefined): AssetClass {
   if (!sec) return "Equities";
@@ -131,7 +150,7 @@ export function buildPortfolio(inputs: RawHolding[]): PortfolioView {
       // Illustrative trailing figures — only meaningful when the book is funded.
       ytdReturnPct: holdings.length > 0 ? 14.82 : 0,
       incomeYieldPct: holdings.length > 0 ? 1.94 : 0,
-      asOf: "Jun 21, 2026 · 4:00 PM ET",
+      asOf: currentAsOf(),
     },
   };
 }

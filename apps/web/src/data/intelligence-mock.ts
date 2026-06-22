@@ -220,22 +220,47 @@ export function buildIntelligence(view: PortfolioView, risk: RiskAnalysis): Inte
     },
   ];
 
-  const highCount = insights.filter((i) => i.priority === "high").length;
-  const oppCount = insights.filter((i) => i.category === "opportunity").length;
+  // Only surface portfolio insights when there's actually a portfolio — otherwise
+  // the page shows concentration/risk "filler" about an empty book. The
+  // market-context read is portfolio-independent and always stays.
+  const funded = investable.length > 0;
+  const PORTFOLIO_IDS = new Set([
+    "concentration-top",
+    "sector-top",
+    "risk-posture",
+    "rebalance-fi",
+    "opportunity-defensives",
+    "watchlist-aapl",
+  ]);
+  const finalInsights = funded ? insights : insights.filter((i) => !PORTFOLIO_IDS.has(i.id));
+  const highCount = finalInsights.filter((i) => i.priority === "high").length;
+  const oppCount = finalInsights.filter((i) => i.category === "opportunity").length;
 
-  const briefing: Briefing = {
-    dateLabel: view.summary.asOf,
-    summary:
-      `Today's review surfaces ${insights.length} items for consideration, ${highCount} of them high priority. The dominant theme is concentration: ${topSym} and the ${sectorLabel.toLowerCase()} sleeve carry single-name and sector exposure near or above policy thresholds. Risk posture is ${tier.toLowerCase()} (score ${score}) into a subdued-volatility tape, which keeps potential hedges comparatively inexpensive. Fixed income remains ${fiW < 20 ? "light" : "in line"} heading into the rate decision.`,
-    highlights: [
-      { label: "High-priority items", value: String(highCount) },
-      { label: "Composite risk", value: `${score} · ${tier}` },
-      { label: "−10% S&P impact", value: pct(spx10?.portfolioImpactPct ?? 0) },
-      { label: "Opportunities", value: String(oppCount) },
-    ],
-  };
+  const briefing: Briefing = funded
+    ? {
+        dateLabel: view.summary.asOf,
+        summary:
+          `Today's review surfaces ${finalInsights.length} items for consideration, ${highCount} of them high priority. The dominant theme is concentration: ${topSym} and the ${sectorLabel.toLowerCase()} sleeve carry single-name and sector exposure near or above policy thresholds. Risk posture is ${tier.toLowerCase()} (score ${score}) into a subdued-volatility tape, which keeps potential hedges comparatively inexpensive. Fixed income remains ${fiW < 20 ? "light" : "in line"} heading into the rate decision.`,
+        highlights: [
+          { label: "High-priority items", value: String(highCount) },
+          { label: "Composite risk", value: `${score} · ${tier}` },
+          { label: "−10% S&P impact", value: pct(spx10?.portfolioImpactPct ?? 0) },
+          { label: "Opportunities", value: String(oppCount) },
+        ],
+      }
+    : {
+        dateLabel: view.summary.asOf,
+        summary:
+          `No funded positions yet — once you add holdings, this briefing summarizes single-name and sector concentration, risk posture, and rebalancing priorities for your book. For now the market backdrop is the main read: the S&P 500 is ${pct(spxIdx?.changePct ?? 0, 2)} with the VIX near ${vixIdx ? vixIdx.level.toFixed(1) : "—"}. See Market News & Impact above for the headlines that matter.`,
+        highlights: [
+          { label: "Funded positions", value: "0" },
+          { label: "S&P 500", value: pct(spxIdx?.changePct ?? 0, 2) },
+          { label: "VIX", value: vixIdx ? vixIdx.level.toFixed(2) : "—" },
+          { label: "Watchlists", value: "active" },
+        ],
+      };
 
-  return { insights, briefing };
+  return { insights: finalInsights, briefing };
 }
 
 export const CATEGORY_LABEL: Record<InsightCategory, string> = {
