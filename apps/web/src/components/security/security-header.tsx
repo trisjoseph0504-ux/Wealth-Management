@@ -3,7 +3,8 @@ import type { SecurityDetail } from "@/data/security-detail-mock";
 import { Card } from "@/components/ui/card";
 import { Money, Delta, ChangePill } from "@/components/ui/financial";
 import { Badge, Button } from "@/components/ui/primitives";
-import { IconStar, IconPlus } from "@/components/ui/icons";
+import { WatchlistButton } from "@/components/security/watchlist-button";
+import { IconPlus } from "@/components/ui/icons";
 
 export function SecurityHeader({ d }: { d: SecurityDetail }) {
   const range = d.week52High - d.week52Low || 1;
@@ -38,9 +39,7 @@ export function SecurityHeader({ d }: { d: SecurityDetail }) {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="primary">
-              <IconStar size={14} /> Add to watchlist
-            </Button>
+            <WatchlistButton symbol={d.symbol} />
             <Button variant="outline">
               <IconPlus size={14} /> Trade
             </Button>

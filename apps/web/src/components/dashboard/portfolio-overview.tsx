@@ -50,7 +50,13 @@ export function PortfolioOverview({ p }: { p: PortfolioSummary }) {
             [
               {
                 label: "Total Gain / Loss",
-                node: <Money value={p.totalGainUsd} compact />,
+                node: (
+                  <Money
+                    value={p.totalGainUsd}
+                    compact
+                    className={p.totalGainUsd > 0 ? "text-pos" : p.totalGainUsd < 0 ? "text-neg" : undefined}
+                  />
+                ),
                 hint: <Percent value={p.totalGainPct} withGlyph />,
               },
               {

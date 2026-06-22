@@ -1,6 +1,7 @@
 /** Portfolio summary header — identity, headline value, and key stat strip. */
 import type { ReactNode } from "react";
 import type { PortfolioSummary } from "@/data/portfolio-derive";
+import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/card";
 import { Money, Percent, Delta, ChangePill } from "@/components/ui/financial";
 import { Badge, SectionLabel } from "@/components/ui/primitives";
@@ -43,7 +44,14 @@ export function PortfolioHeader({ s }: { s: PortfolioSummary }) {
         <div className="flex flex-col items-start gap-1 lg:items-end">
           <SectionLabel>Total Gain / Loss</SectionLabel>
           <div className="flex items-center gap-2">
-            <Money value={s.totalGain} className="text-2xl font-semibold tracking-tight text-pos" />
+            <Money
+              value={s.totalGain}
+              className={cn(
+                "text-2xl font-semibold tracking-tight",
+                s.totalGain > 0 ? "text-pos" : s.totalGain < 0 ? "text-neg" : "text-fg",
+              )}
+            />
+            <span className="text-lg text-fg-subtle">/</span>
             <Percent value={s.totalGainPct} withGlyph className="text-sm" />
           </div>
           <p className="inline-flex items-center gap-1 text-[11px] text-fg-subtle">
