@@ -10,6 +10,8 @@ import { notFound } from "next/navigation";
 import { getSecurityDetail, type LiveOverride } from "@/data/security-detail-mock";
 import { getSecurity } from "@/data/markets-mock";
 import { getMarketData } from "@/server/market";
+import { getCompanyNews } from "@/server/market/news";
+import { analyzeNews } from "@/data/news-analysis";
 import { listHoldingsAction } from "@/server/actions/holdings";
 import { buildPortfolio } from "@/data/portfolio-derive";
 import { SecurityHeader } from "@/components/security/security-header";
@@ -60,6 +62,9 @@ export default async function SecurityPage({ params }: { params: Promise<{ symbo
   const d = getSecurityDetail(sym, live, liveExposure);
   if (!d) notFound();
 
+  // Live company news for this security.
+  const companyNews = analyzeNews(await getCompanyNews(sym, 8), []);
+
   return (
     <div className="space-y-6">
       <nav className="flex items-center gap-1.5 text-[12px] text-fg-subtle">
@@ -88,7 +93,7 @@ export default async function SecurityPage({ params }: { params: Promise<{ symbo
       </div>
 
       <BullBear d={d} />
-      <NewsFeed d={d} />
+      <NewsFeed symbol={d.symbol} news={companyNews} />
     </div>
   );
 }

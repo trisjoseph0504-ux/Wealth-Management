@@ -117,15 +117,15 @@ export async function getMarketNews(): Promise<NewsItem[]> {
   return map(await fetchNews("/news", { category: "general" }, 600)).slice(0, 40);
 }
 
-/** Recent company-specific news for a single symbol (last ~7 days). */
-export async function getCompanyNews(symbol: string): Promise<NewsItem[]> {
+/** Recent company-specific news for a single symbol (last ~14 days). */
+export async function getCompanyNews(symbol: string, limit = 6): Promise<NewsItem[]> {
   if (env.MARKET_DATA_PROVIDER !== "finnhub") return [];
   const to = new Date();
-  const from = new Date(to.getTime() - 7 * 86_400_000);
+  const from = new Date(to.getTime() - 14 * 86_400_000);
   const fmt = (d: Date) => d.toISOString().slice(0, 10);
   const items = await fetchNews("/company-news", { symbol, from: fmt(from), to: fmt(to) }, 1800);
   // Finnhub doesn't always set `related`; stamp the requested symbol so we can tag it.
   return map(items)
     .map((n) => ({ ...n, related: n.related || symbol }))
-    .slice(0, 6);
+    .slice(0, limit);
 }
