@@ -83,7 +83,8 @@ export function CompareClient({ initialCards }: { initialCards: CompareCard[] })
 
   return (
     <div className="space-y-4">
-      <Card>
+      {/* relative z-30 lifts this card (and its search dropdown) above the table card below */}
+      <Card className="relative z-30">
         <CardHeader
           title="Add to comparison"
           subtitle={`${cards.length} of ${MAX_CARDS} · search any stock, ETF, or fund`}
