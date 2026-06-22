@@ -1,15 +1,17 @@
 "use client";
 
 /**
- * Live NYSE session indicator. Computes the real regular-session status in
- * US/Eastern (the market's own timezone — correct regardless of the viewer's
- * locale, including Central) and refreshes each minute. Regular hours are
- * Mon–Fri 9:30 AM – 4:00 PM ET, excluding 2026 US market holidays.
+ * Live market clock + NYSE session indicator. Shows a ticking current time in
+ * US/Central (CT) next to an open/closed badge. The open/closed status is still
+ * determined in US/Eastern — the market's own timezone, the only correct basis —
+ * but every time shown to the user is Central. Regular hours: Mon–Fri 9:30 AM –
+ * 4:00 PM ET (8:30 AM – 3:00 PM CT), excluding 2026 US market holidays.
  *
- * Status is resolved in an effect (not during render) so SSR and the first client
+ * Time is resolved in an effect (not during render) so SSR and the first client
  * paint match — avoiding hydration drift from clock differences.
  */
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/primitives";
 
 // NYSE full-day closures for 2026 (YYYY-MM-DD, US/Eastern calendar date).
@@ -28,7 +30,7 @@ const HOLIDAYS_2026 = new Set([
 
 interface Status {
   open: boolean;
-  reason: string; // tooltip detail
+  reason: string; // tooltip detail (Central time)
 }
 
 function computeStatus(): Status {
@@ -56,29 +58,45 @@ function computeStatus(): Status {
   const CLOSE = 16 * 60; // 16:00 ET
   const inSession = minutes >= OPEN && minutes < CLOSE;
 
-  if (isWeekend) return { open: false, reason: "Weekend · NYSE opens 9:30 AM ET Mon (8:30 AM CT)" };
+  if (isWeekend) return { open: false, reason: "Weekend · market opens Monday 8:30 AM CT" };
   if (isHoliday) return { open: false, reason: "Market holiday · NYSE closed today" };
   if (!inSession) {
     const which = minutes < OPEN ? "Pre-market" : "After hours";
-    return { open: false, reason: `${which} · regular session 9:30 AM–4:00 PM ET (8:30 AM–3:00 PM CT)` };
+    return { open: false, reason: `${which} · regular session 8:30 AM – 3:00 PM CT` };
   }
-  return { open: true, reason: "Regular session · 9:30 AM–4:00 PM ET (8:30 AM–3:00 PM CT)" };
+  return { open: true, reason: "Open · regular session 8:30 AM – 3:00 PM CT" };
+}
+
+// Current wall-clock time in Central, e.g. "10:31 PM CT".
+function centralTime(): string {
+  return (
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Chicago",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(new Date()) + " CT"
+  );
 }
 
 export function MarketStatus({ className }: { className?: string }) {
   const [status, setStatus] = useState<Status | null>(null);
+  const [now, setNow] = useState<string | null>(null);
 
   useEffect(() => {
-    const tick = () => setStatus(computeStatus());
+    const tick = () => {
+      setStatus(computeStatus());
+      setNow(centralTime());
+    };
     tick();
-    const id = setInterval(tick, 60_000);
+    const id = setInterval(tick, 15_000); // keeps the clock current to the minute
     return () => clearInterval(id);
   }, []);
 
   // Pre-mount neutral state (matches SSR output → no hydration mismatch).
-  if (!status) {
+  if (!status || !now) {
     return (
-      <span className={className} title="Checking market hours…">
+      <span className={cn("items-center gap-2", className)} title="Checking market hours…">
         <Badge tone="neutral">
           <span className="size-1.5 rounded-full bg-fg-subtle" />
           Markets
@@ -88,7 +106,8 @@ export function MarketStatus({ className }: { className?: string }) {
   }
 
   return (
-    <span className={className} title={status.reason}>
+    <span className={cn("items-center gap-2", className)} title={status.reason}>
+      <span className="tnum hidden text-[11px] tabular-nums text-fg-subtle lg:inline">{now}</span>
       <Badge tone={status.open ? "emerald" : "neutral"}>
         <span className={`size-1.5 rounded-full ${status.open ? "bg-emerald" : "bg-fg-subtle"}`} />
         {status.open ? "Markets Open" : "Markets Closed"}

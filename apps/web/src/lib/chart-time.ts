@@ -32,8 +32,8 @@ export function rangePointLabels(key: string, n: number): string[] {
   if (n <= 0) return out;
 
   if (key === "1D") {
-    const startMin = 9 * 60 + 30; // 9:30
-    const endMin = 16 * 60; // 16:00
+    const startMin = 8 * 60 + 30; // 8:30 AM CT (market open)
+    const endMin = 15 * 60; // 3:00 PM CT (market close)
     for (let i = 0; i < n; i++) {
       const m = Math.round(startMin + ((endMin - startMin) * i) / (n - 1 || 1));
       const h = Math.floor(m / 60);
