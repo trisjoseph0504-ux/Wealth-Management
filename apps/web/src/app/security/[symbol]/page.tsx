@@ -10,6 +10,8 @@ import { notFound } from "next/navigation";
 import { getSecurityDetail, type LiveOverride } from "@/data/security-detail-mock";
 import { getSecurity } from "@/data/markets-mock";
 import { getMarketData } from "@/server/market";
+import { listHoldingsAction } from "@/server/actions/holdings";
+import { buildPortfolio } from "@/data/portfolio-derive";
 import { SecurityHeader } from "@/components/security/security-header";
 import { SecurityChart } from "@/components/security/security-chart";
 import { KeyStats } from "@/components/security/key-stats";
@@ -42,7 +44,20 @@ export default async function SecurityPage({ params }: { params: Promise<{ symbo
       }
     : undefined;
 
-  const d = getSecurityDetail(sym, live);
+  // Real portfolio exposure for this symbol (null = genuinely not held).
+  const view = buildPortfolio(await listHoldingsAction());
+  const heldLive = view.holdings.find((h) => h.symbol === sym);
+  const liveExposure = heldLive
+    ? {
+        quantity: heldLive.quantity,
+        marketValue: heldLive.marketValue,
+        weightPct: heldLive.weightPct,
+        gainUsd: heldLive.gainUsd,
+        gainPct: heldLive.gainPct,
+      }
+    : null;
+
+  const d = getSecurityDetail(sym, live, liveExposure);
   if (!d) notFound();
 
   return (

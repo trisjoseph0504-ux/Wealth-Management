@@ -23,7 +23,20 @@ export function NewsImpactFeed({ items }: { items: AnalyzedNews[] }) {
   const score = (n: AnalyzedNews) => (n.topic.id !== "market" ? 2 : 0) + (n.watchlistSymbols.length > 0 ? 1 : 0);
   const ordered = [...items].sort((a, b) => score(b) - score(a));
   const substantive = ordered.filter((n) => n.topic.id !== "market" || n.watchlistSymbols.length > 0);
-  const shown = (substantive.length >= 8 ? substantive : ordered).slice(0, 16);
+  const pool = substantive.length >= 8 ? substantive : ordered;
+  // Cap watchlist company news (Finnhub free-tier aggregates it from a single
+  // source) so it doesn't crowd out macro news that carries real, varied
+  // publishers — the feed stays a mix of named sources, not all one outlet.
+  const shown: AnalyzedNews[] = [];
+  let companyCount = 0;
+  for (const n of pool) {
+    if (n.watchlistSymbols.length > 0) {
+      if (companyCount >= 5) continue;
+      companyCount++;
+    }
+    shown.push(n);
+    if (shown.length >= 16) break;
+  }
 
   return (
     <Card>

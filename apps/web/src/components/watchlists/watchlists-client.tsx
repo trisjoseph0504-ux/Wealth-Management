@@ -92,38 +92,50 @@ export function WatchlistsClient({ initialLists }: { initialLists: SeamWatchlist
         activeId={active?.id ?? ""}
         onSelect={setActiveId}
         onCreate={createList}
+        onDelete={deleteList}
       />
 
       <Card className="flex min-w-0 flex-col">
-        <CardHeader
-          title={active?.name ?? "Watchlist"}
-          subtitle={`${items.length} ${items.length === 1 ? "instrument" : "instruments"}`}
-          icon={<IconStar size={16} />}
-          action={
-            active && lists.length > 1 ? (
-              <button
-                type="button"
-                onClick={() => deleteList(active.id)}
-                className="reduce-motion-safe inline-flex items-center gap-1.5 rounded-[4px] px-2 py-1 text-xs text-fg-subtle transition hover:bg-surface-2 hover:text-neg"
-              >
-                <IconTrash size={14} /> Delete
-              </button>
-            ) : undefined
-          }
-        />
+        {active ? (
+          <>
+            <CardHeader
+              title={active.name}
+              subtitle={`${items.length} ${items.length === 1 ? "instrument" : "instruments"}`}
+              icon={<IconStar size={16} />}
+              action={
+                <button
+                  type="button"
+                  onClick={() => deleteList(active.id)}
+                  className="reduce-motion-safe inline-flex items-center gap-1.5 rounded-[4px] px-2 py-1 text-xs text-fg-subtle transition hover:bg-surface-2 hover:text-neg"
+                >
+                  <IconTrash size={14} /> Delete list
+                </button>
+              }
+            />
 
-        <div className="border-b border-hairline px-5 py-3">
-          <AddTicker existing={active?.symbols ?? []} onAdd={addSymbol} />
-        </div>
+            <div className="border-b border-hairline px-5 py-3">
+              <AddTicker existing={active.symbols} onAdd={addSymbol} />
+            </div>
 
-        {items.length === 0 ? (
-          <EmptyState
-            icon={<IconEye size={18} />}
-            title="This watchlist is empty"
-            description="Search for a ticker above to start tracking it. Prices, day change, and trend will appear here."
-          />
+            {items.length === 0 ? (
+              <EmptyState
+                icon={<IconEye size={18} />}
+                title="This watchlist is empty"
+                description="Search for a ticker above to start tracking it. Prices, day change, and trend will appear here."
+              />
+            ) : (
+              <WatchlistTable items={items} onRemove={removeSymbol} />
+            )}
+          </>
         ) : (
-          <WatchlistTable items={items} onRemove={removeSymbol} />
+          <>
+            <CardHeader title="Watchlists" subtitle="No list selected" icon={<IconStar size={16} />} />
+            <EmptyState
+              icon={<IconEye size={18} />}
+              title="No watchlists yet"
+              description="Create a list from the panel on the left to start tracking instruments."
+            />
+          </>
         )}
       </Card>
     </div>
@@ -135,35 +147,51 @@ function ListRail({
   activeId,
   onSelect,
   onCreate,
+  onDelete,
 }: {
   lists: List[];
   activeId: string;
   onSelect: (id: string) => void;
   onCreate: () => void;
+  onDelete: (id: string) => void;
 }) {
   return (
     <Card className="flex flex-col">
-      <CardHeader title="Watchlists" subtitle={`${lists.length} lists`} icon={<IconEye size={16} />} />
+      <CardHeader title="Watchlists" subtitle={`${lists.length} ${lists.length === 1 ? "list" : "lists"}`} icon={<IconEye size={16} />} />
       <div className="flex gap-1.5 overflow-x-auto p-3 lg:flex-col lg:overflow-visible">
         {lists.map((l) => {
           const active = l.id === activeId;
           return (
-            <button
+            <div
               key={l.id}
-              type="button"
-              onClick={() => onSelect(l.id)}
               className={cn(
-                "reduce-motion-safe flex shrink-0 items-center justify-between gap-3 rounded-[6px] px-3 py-2 text-left text-[13px] font-medium transition lg:shrink",
-                active
-                  ? "bg-emerald/10 text-fg ring-1 ring-inset ring-emerald/25"
-                  : "text-fg-muted hover:bg-surface-2 hover:text-fg",
+                "group/li reduce-motion-safe flex shrink-0 items-center gap-1 rounded-[6px] pr-1 transition lg:shrink",
+                active ? "bg-emerald/10 ring-1 ring-inset ring-emerald/25" : "hover:bg-surface-2",
               )}
             >
-              <span className="truncate">{l.name}</span>
-              <span className="tnum shrink-0 rounded-full bg-inset px-1.5 py-0.5 text-[10px] text-fg-subtle">
-                {l.symbols.length}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => onSelect(l.id)}
+                className={cn(
+                  "flex min-w-0 flex-1 items-center justify-between gap-3 px-3 py-2 text-left text-[13px] font-medium transition",
+                  active ? "text-fg" : "text-fg-muted group-hover/li:text-fg",
+                )}
+              >
+                <span className="truncate">{l.name}</span>
+                <span className="tnum shrink-0 rounded-full bg-inset px-1.5 py-0.5 text-[10px] text-fg-subtle">
+                  {l.symbols.length}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => onDelete(l.id)}
+                aria-label={`Delete ${l.name}`}
+                title="Delete list"
+                className="reduce-motion-safe flex size-6 shrink-0 items-center justify-center rounded-[4px] text-fg-subtle opacity-0 transition hover:bg-surface hover:text-neg focus-visible:opacity-100 group-hover/li:opacity-100"
+              >
+                <IconTrash size={13} />
+              </button>
+            </div>
           );
         })}
       </div>

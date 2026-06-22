@@ -44,6 +44,58 @@ async function fetchNews(path: string, params: Record<string, string>, revalidat
   }
 }
 
+// Finnhub's `source` is often a generic aggregator ("Yahoo") even when the
+// article is from elsewhere. The real publisher is the article's own domain.
+const SOURCE_NAMES: Record<string, string> = {
+  "reuters.com": "Reuters",
+  "cnbc.com": "CNBC",
+  "bloomberg.com": "Bloomberg",
+  "wsj.com": "WSJ",
+  "ft.com": "Financial Times",
+  "marketwatch.com": "MarketWatch",
+  "barrons.com": "Barron's",
+  "fool.com": "Motley Fool",
+  "investors.com": "Investor's Business Daily",
+  "businessinsider.com": "Business Insider",
+  "forbes.com": "Forbes",
+  "seekingalpha.com": "Seeking Alpha",
+  "yahoo.com": "Yahoo Finance",
+  "apnews.com": "Associated Press",
+  "investopedia.com": "Investopedia",
+  "thestreet.com": "TheStreet",
+  "benzinga.com": "Benzinga",
+  "zacks.com": "Zacks",
+  "nytimes.com": "The New York Times",
+  "techcrunch.com": "TechCrunch",
+  "theverge.com": "The Verge",
+  "cnn.com": "CNN",
+  "foxbusiness.com": "Fox Business",
+  "axios.com": "Axios",
+  "morningstar.com": "Morningstar",
+};
+
+function cleanName(name: string): string {
+  const key = name.trim().toLowerCase();
+  const mapped = SOURCE_NAMES[key] ?? SOURCE_NAMES[`${key}.com`]; // "yahoo" → Yahoo Finance
+  return mapped ?? name.trim();
+}
+
+function sourceFromUrl(url: string, fallback: string): string {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+    // Finnhub redirect links don't carry the publisher in the host — trust the
+    // provider's source field instead (it holds the real publisher for company news).
+    if (host.includes("finnhub")) return fallback ? cleanName(fallback) : "News";
+    const base = host.split(".").slice(-2).join(".");
+    if (SOURCE_NAMES[host]) return SOURCE_NAMES[host];
+    if (SOURCE_NAMES[base]) return SOURCE_NAMES[base];
+    const label = base.split(".")[0] ?? host;
+    return label ? label.charAt(0).toUpperCase() + label.slice(1) : fallback || "News";
+  } catch {
+    return fallback ? cleanName(fallback) : "News";
+  }
+}
+
 function map(items: FhNews[]): NewsItem[] {
   return items
     .filter((n) => n.headline && n.url)
@@ -51,7 +103,7 @@ function map(items: FhNews[]): NewsItem[] {
       id: String(n.id ?? n.url),
       headline: n.headline!,
       summary: n.summary ?? "",
-      source: n.source ?? "",
+      source: sourceFromUrl(n.url!, n.source ?? ""),
       url: n.url!,
       datetime: n.datetime ?? 0,
       related: n.related ?? "",

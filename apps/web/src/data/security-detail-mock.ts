@@ -133,7 +133,11 @@ export interface LiveOverride {
   exchange?: string;
 }
 
-export function getSecurityDetail(symbol: string, live?: LiveOverride): SecurityDetail | null {
+export function getSecurityDetail(
+  symbol: string,
+  live?: LiveOverride,
+  liveExposure?: SecurityExposure | null,
+): SecurityDetail | null {
   const found = getSecurity(symbol);
   if (!found && !live) return null;
 
@@ -198,16 +202,22 @@ export function getSecurityDetail(symbol: string, live?: LiveOverride): Security
   const theme = SECTOR_THEME[s.sector];
   const sectorLc = s.sector.toLowerCase();
 
-  const held = holdings.find((h) => h.symbol === symbol);
-  const exposure: SecurityExposure | null = held
-    ? {
-        quantity: held.quantity,
-        marketValue: held.marketValue,
-        weightPct: held.weightPct,
-        gainUsd: held.gainUsd,
-        gainPct: held.gainPct,
-      }
-    : null;
+  // Exposure reflects the user's REAL holdings when the caller supplies it
+  // (passing `null` = confirmed not held). Falls back to the static demo book
+  // only when nothing is provided.
+  let exposure: SecurityExposure | null = liveExposure ?? null;
+  if (liveExposure === undefined) {
+    const held = holdings.find((h) => h.symbol === symbol);
+    exposure = held
+      ? {
+          quantity: held.quantity,
+          marketValue: held.marketValue,
+          weightPct: held.weightPct,
+          gainUsd: held.gainUsd,
+          gainPct: held.gainPct,
+        }
+      : null;
+  }
 
   return {
     symbol: s.symbol,
