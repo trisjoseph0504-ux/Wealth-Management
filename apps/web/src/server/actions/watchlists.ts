@@ -45,3 +45,15 @@ export async function removeWatchlistItemAction(watchlistId: string, symbol: str
   await getData().watchlists.removeItem(user.id, watchlistId, symbol);
   revalidateWatchlists();
 }
+
+/** Quick-add (right-click): add a symbol to the user's first watchlist, creating
+ *  a default one if none exist. Returns the list name for a confirmation toast. */
+export async function quickAddToWatchlistAction(symbol: string): Promise<{ list: string }> {
+  const user = await getCurrentUser();
+  const data = getData();
+  const lists = await data.watchlists.list(user.id);
+  const target = lists[0] ?? (await data.watchlists.create(user.id, "Watchlist"));
+  await data.watchlists.addItem(user.id, target.id, symbol);
+  revalidateWatchlists();
+  return { list: target.name };
+}

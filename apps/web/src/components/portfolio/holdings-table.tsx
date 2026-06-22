@@ -16,7 +16,8 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Money, Percent, Delta } from "@/components/ui/financial";
 import { Button, EmptyState } from "@/components/ui/primitives";
 import { SymbolCombobox } from "@/components/ui/symbol-combobox";
-import { TickerLink } from "@/components/ui/ticker-link";
+import { TickerLink, tickerMenuItems } from "@/components/ui/ticker-link";
+import { useContextMenu } from "@/components/ui/context-menu";
 import { IconSearch, IconLayers, IconArrowUp, IconArrowDown, IconPlus, IconTrash, IconClose } from "@/components/ui/icons";
 
 type SortKey = "symbol" | "assetClass" | "quantity" | "price" | "marketValue" | "dayChangePct" | "gainUsd" | "weightPct";
@@ -178,8 +179,20 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
 }
 
 function HoldingRow({ h, onRemove }: { h: Holding; onRemove: () => void }) {
+  const router = useRouter();
+  const { openMenu } = useContextMenu();
   return (
-    <tr className="group reduce-motion-safe border-b border-hairline/60 transition last:border-0 hover:bg-surface-2/40">
+    <tr
+      className="group reduce-motion-safe border-b border-hairline/60 transition last:border-0 hover:bg-surface-2/40"
+      onContextMenu={(e) =>
+        openMenu(e, [
+          ...tickerMenuItems(h.symbol, router),
+          { separator: true, label: "" },
+          { label: "Remove holding", icon: <IconTrash size={14} />, danger: true, onSelect: onRemove },
+        ])
+      }
+    >
+
       <td className="px-4 py-3">
         <TickerLink symbol={h.symbol} className="block w-fit font-semibold tracking-tight text-fg" />
         <div className="max-w-[180px] truncate text-[11px] text-fg-subtle">{h.name}</div>

@@ -7,6 +7,7 @@
  * future API calls (createList / addItem / removeItem).
  */
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { securities, getSecurity, type Security } from "@/data/markets-mock";
 import {
   createWatchlistAction,
@@ -21,7 +22,8 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Money, ChangePill } from "@/components/ui/financial";
 import { Sparkline } from "@/components/ui/sparkline";
 import { Button, EmptyState } from "@/components/ui/primitives";
-import { TickerLink } from "@/components/ui/ticker-link";
+import { TickerLink, tickerMenuItems } from "@/components/ui/ticker-link";
+import { useContextMenu } from "@/components/ui/context-menu";
 import {
   IconEye,
   IconPlus,
@@ -269,6 +271,8 @@ function AddTicker({ existing, onAdd }: { existing: string[]; onAdd: (symbol: st
 }
 
 function WatchlistTable({ items, onRemove }: { items: Security[]; onRemove: (symbol: string) => void }) {
+  const router = useRouter();
+  const { openMenu } = useContextMenu();
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[620px] border-collapse text-[13px]">
@@ -285,7 +289,17 @@ function WatchlistTable({ items, onRemove }: { items: Security[]; onRemove: (sym
         </thead>
         <tbody>
           {items.map((s) => (
-            <tr key={s.symbol} className="group border-b border-hairline/60 transition last:border-0 hover:bg-surface-2/40">
+            <tr
+              key={s.symbol}
+              className="group border-b border-hairline/60 transition last:border-0 hover:bg-surface-2/40"
+              onContextMenu={(e) =>
+                openMenu(e, [
+                  ...tickerMenuItems(s.symbol, router),
+                  { separator: true, label: "" },
+                  { label: "Remove from list", icon: <IconTrash size={14} />, danger: true, onSelect: () => onRemove(s.symbol) },
+                ])
+              }
+            >
               <td className="px-4 py-3">
                 <TickerLink symbol={s.symbol} className="block w-fit font-semibold tracking-tight text-fg" />
                 <div className="max-w-[200px] truncate text-[11px] text-fg-subtle">{s.name}</div>

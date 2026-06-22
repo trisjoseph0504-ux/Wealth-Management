@@ -6,17 +6,17 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
 import { Topbar } from "@/components/shell/topbar";
+import { ContextMenuProvider } from "@/components/ui/context-menu";
+import { Toaster } from "@/components/ui/toast";
 
 const BARE_ROUTES = new Set(["/sign-in"]);
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  if (BARE_ROUTES.has(pathname)) {
-    return <div className="app-canvas min-h-screen">{children}</div>;
-  }
-
-  return (
+  const content = BARE_ROUTES.has(pathname) ? (
+    <div className="app-canvas min-h-screen">{children}</div>
+  ) : (
     <div className="app-canvas flex min-h-screen">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
@@ -26,5 +26,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
     </div>
+  );
+
+  return (
+    <ContextMenuProvider>
+      {content}
+      <Toaster />
+    </ContextMenuProvider>
   );
 }

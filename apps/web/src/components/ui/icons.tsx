@@ -137,3 +137,6 @@ export const IconSun = (p: IconProps) => (
 export const IconNote = (p: IconProps) => (
   <svg {...base(p)}><path d="M6 3h8l5 5v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" /><path d="M14 3v5h5M8 13h8M8 17h6" /></svg>
 );
+export const IconCopy = (p: IconProps) => (
+  <svg {...base(p)}><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2" /></svg>
+);
