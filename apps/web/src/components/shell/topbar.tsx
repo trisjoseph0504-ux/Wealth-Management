@@ -11,8 +11,9 @@ import { LwLogo } from "@/components/shell/logo";
 import { MobileNav } from "@/components/shell/mobile-nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { GlobalSearch } from "@/components/shell/global-search";
-import { Badge } from "@/components/ui/primitives";
-import { IconBell, IconPlus } from "@/components/ui/icons";
+import { MarketStatus } from "@/components/shell/market-status";
+import { ReportButton } from "@/components/shell/report-button";
+import { IconBell } from "@/components/ui/icons";
 import { navGroups, isActiveHref } from "@/lib/nav";
 
 function useRouteTitle(): string {
@@ -49,10 +50,7 @@ export function Topbar({ subtitle }: { subtitle?: string }) {
       <GlobalSearch className="hidden min-w-0 flex-1 sm:block sm:max-w-xl sm:flex-1 lg:mx-4" />
 
       <div className="ml-auto flex items-center gap-2">
-        <Badge tone="emerald" className="hidden sm:inline-flex">
-          <span className="size-1.5 rounded-full bg-emerald" />
-          Markets Open
-        </Badge>
+        <MarketStatus className="hidden sm:inline-flex" />
         <ThemeToggle />
         <Link
           href="/alerts"
@@ -62,13 +60,7 @@ export function Topbar({ subtitle }: { subtitle?: string }) {
           <IconBell size={17} />
           <span className="absolute right-2 top-2 size-1.5 rounded-full bg-emerald" />
         </Link>
-        <button
-          type="button"
-          className="reduce-motion-safe hidden items-center gap-2 rounded-[4px] bg-emerald px-3 py-2 text-xs font-semibold text-accent-contrast transition hover:bg-emerald-bright sm:inline-flex"
-        >
-          <IconPlus size={15} />
-          New Report
-        </button>
+        <ReportButton />
       </div>
     </header>
   );

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Explicit source globs — auto-detection misses files in this monorepo layout,
+   which left utility classes ungenerated. Relative to this file (src/app/). */
+@source "../**/*.{ts,tsx}";
+
 /* ─────────────────────────────────────────────────────────────────────────────
    Lewis Wealth Intelligence — Design Tokens (themeable)
    See docs/DESIGN_SYSTEM.md §2/§10.

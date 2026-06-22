@@ -4,7 +4,7 @@
  * precision); real computation arrives in Phase 4 (ARCHITECTURE §4).
  */
 import type { ReactNode } from "react";
-import { risk } from "@/data/mock";
+import type { RiskSnapshot as RiskSnapshotData } from "@/data/mock";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Money, Percent } from "@/components/ui/financial";
 import { Badge } from "@/components/ui/primitives";
@@ -47,7 +47,7 @@ function Metric({ label, value, note }: { label: string; value: ReactNode; note?
   );
 }
 
-export function RiskSnapshot() {
+export function RiskSnapshot({ risk }: { risk: RiskSnapshotData }) {
   return (
     <Card className="flex h-full flex-col">
       <CardHeader

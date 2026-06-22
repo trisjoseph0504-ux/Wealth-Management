@@ -1,11 +1,11 @@
 /** Asset allocation — donut + weighted breakdown bars. */
-import { allocation } from "@/data/mock";
+import type { AllocationSlice } from "@/data/mock";
 import { Card, CardHeader, CardLink } from "@/components/ui/card";
 import { Money } from "@/components/ui/financial";
 import { Donut, colorAt } from "@/components/ui/donut";
 import { IconPie } from "@/components/ui/icons";
 
-export function AllocationSection() {
+export function AllocationSection({ allocation }: { allocation: AllocationSlice[] }) {
   const total = allocation.reduce((s, a) => s + a.valueUsd, 0);
 
   return (
@@ -26,7 +26,7 @@ export function AllocationSection() {
                   Total
                 </span>
                 <Money value={total} compact className="text-lg font-semibold text-fg" />
-                <span className="mt-0.5 text-[10px] text-fg-subtle">6 classes</span>
+                <span className="mt-0.5 text-[10px] text-fg-subtle">{allocation.length} classes</span>
               </>
             }
           />

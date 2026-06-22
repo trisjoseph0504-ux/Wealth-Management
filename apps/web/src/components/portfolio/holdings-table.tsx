@@ -15,6 +15,7 @@ import { formatNumber } from "@/lib/format";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Money, Percent, Delta } from "@/components/ui/financial";
 import { Button, EmptyState } from "@/components/ui/primitives";
+import { SymbolCombobox } from "@/components/ui/symbol-combobox";
 import { TickerLink } from "@/components/ui/ticker-link";
 import { IconSearch, IconLayers, IconArrowUp, IconArrowDown, IconPlus, IconTrash, IconClose } from "@/components/ui/icons";
 
@@ -242,11 +243,11 @@ function AddHoldingForm({ onDone }: { onDone: () => void }) {
     <div className="border-b border-hairline bg-inset/30 px-5 py-4">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1.5fr_1fr_1fr_auto] sm:items-end">
         <Field label="Ticker">
-          <input
+          <SymbolCombobox
             value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-            placeholder="e.g. AAPL or SPY"
-            className="w-full rounded-[6px] border border-hairline bg-surface px-3 py-2 text-[13px] text-fg placeholder:text-fg-subtle focus:border-emerald/40 focus:outline-none"
+            onChange={setSymbol}
+            onSelect={(hit) => setSymbol(hit.symbol)}
+            placeholder="Search e.g. Apple or AAPL"
           />
         </Field>
         <Field label="Quantity">

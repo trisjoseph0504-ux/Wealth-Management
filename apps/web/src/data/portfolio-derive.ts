@@ -128,8 +128,9 @@ export function buildPortfolio(inputs: RawHolding[]): PortfolioView {
       dayChangePct: totalValue > 0 ? (dayChangeUsd / totalValue) * 100 : 0,
       cash: holdings.filter((h) => h.assetClass === "Cash").reduce((s, h) => s + h.marketValue, 0),
       holdingsCount: investable.length,
-      ytdReturnPct: 14.82,
-      incomeYieldPct: 1.94,
+      // Illustrative trailing figures — only meaningful when the book is funded.
+      ytdReturnPct: holdings.length > 0 ? 14.82 : 0,
+      incomeYieldPct: holdings.length > 0 ? 1.94 : 0,
       asOf: "Jun 21, 2026 · 4:00 PM ET",
     },
   };

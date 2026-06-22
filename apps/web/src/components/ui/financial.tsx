@@ -78,7 +78,7 @@ export function DirectionGlyph({
 }) {
   if (direction === "up") return <IconArrowUpRight size={size} className="text-pos" />;
   if (direction === "down") return <IconArrowDownRight size={size} className="text-neg" />;
-  return <span className="text-flat">·</span>;
+  return null; // flat / zero: no glyph (avoids a stray dot next to 0.00%)
 }
 
 /** Compact pill showing a signed % move with directional tint. */

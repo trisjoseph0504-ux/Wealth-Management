@@ -23,14 +23,12 @@ Vercel accounts — they involve signing in, which only you can do. Budget ~15 m
 
 ## Step 2 — Push the code to GitHub
 
-Open a terminal **in the project folder** and run these (replace `<URL>` with the
-repo URL from Step 1). I can run these for you in chat once the repo exists — just
-tell me the URL.
+The code is **already committed** locally (first commit done). You just need to
+connect the GitHub repo and push. Run these (replace `<URL>` with the repo URL from
+Step 1) — or paste me the URL in chat and I'll run them for you:
 
 ```bash
 cd C:\dev\lewis-wealth-intelligence
-git add -A
-git commit -m "Lewis Wealth Intelligence — real market data + live analytics"
 git branch -M main
 git remote add origin <URL>
 git push -u origin main

@@ -1,12 +1,12 @@
 /** Portfolio overview — hero value + day move, trend, and key stat cards. */
-import { portfolio } from "@/data/mock";
+import type { PortfolioSummary } from "@/data/mock";
 import { Card } from "@/components/ui/card";
 import { Money, Percent, Delta, ChangePill } from "@/components/ui/financial";
 import { SectionLabel } from "@/components/ui/primitives";
 import { Sparkline } from "@/components/ui/sparkline";
 
-export function PortfolioOverview() {
-  const p = portfolio;
+export function PortfolioOverview({ p }: { p: PortfolioSummary }) {
+  const cashPct = p.totalValueUsd > 0 ? (p.cashUsd / p.totalValueUsd) * 100 : 0;
   return (
     <Card className="overflow-hidden">
       <div className="grid gap-px bg-hairline lg:grid-cols-[1.4fr_1fr]">
@@ -61,7 +61,7 @@ export function PortfolioOverview() {
               {
                 label: "Cash & Equivalents",
                 node: <Money value={p.cashUsd} compact />,
-                hint: <span className="text-fg-subtle">5.1% of portfolio</span>,
+                hint: <span className="text-fg-subtle">{cashPct.toFixed(1)}% of portfolio</span>,
               },
               {
                 label: "Buying Power",
