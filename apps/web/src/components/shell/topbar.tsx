@@ -31,7 +31,7 @@ function useRouteTitle(): string {
   return "Dashboard";
 }
 
-export function Topbar({ subtitle }: { subtitle?: string }) {
+export function Topbar() {
   const title = useRouteTitle();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-hairline bg-base/80 px-4 backdrop-blur-md md:px-6">
@@ -40,11 +40,8 @@ export function Topbar({ subtitle }: { subtitle?: string }) {
         <LwLogo size={26} />
       </div>
 
-      <div className="hidden min-w-0 flex-col leading-tight lg:flex">
+      <div className="hidden min-w-0 lg:flex lg:items-center">
         <h1 className="truncate text-[15px] font-semibold tracking-tight text-fg">{title}</h1>
-        <p className="truncate text-[11px] text-fg-subtle">
-          {subtitle ?? "Lewis Family Office · Private Wealth"}
-        </p>
       </div>
 
       <GlobalSearch className="hidden min-w-0 flex-1 sm:block sm:max-w-xl sm:flex-1 lg:mx-4" />
