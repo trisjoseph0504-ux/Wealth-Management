@@ -16,12 +16,27 @@ export function formatCurrency(
   opts: { compact?: boolean; maximumFractionDigits?: number } = {},
 ): string {
   const { compact = false, maximumFractionDigits = 2 } = opts;
+
+  // "compact" only abbreviates at $1M+ (e.g. $1.2M). Below that it shows the
+  // full amount with separators and no cents ($12,150) — abbreviating thousands
+  // as "$12.15K" reads oddly for everyday portfolio values.
+  if (compact) {
+    const millions = Math.abs(value) >= 1_000_000;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      notation: millions ? "compact" : "standard",
+      maximumFractionDigits: millions ? 1 : 0,
+      minimumFractionDigits: 0,
+    }).format(value);
+  }
+
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency,
-    notation: compact ? "compact" : "standard",
-    maximumFractionDigits: compact ? 2 : maximumFractionDigits,
-    minimumFractionDigits: compact ? 0 : maximumFractionDigits,
+    notation: "standard",
+    maximumFractionDigits,
+    minimumFractionDigits: maximumFractionDigits,
   }).format(value);
 }
 
