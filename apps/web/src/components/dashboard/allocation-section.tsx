@@ -32,15 +32,15 @@ export function AllocationSection({ allocation }: { allocation: AllocationSlice[
           />
         </div>
 
-        <ul className="flex-1 space-y-2.5">
+        <ul className="min-w-0 flex-1 space-y-2.5">
           {allocation.map((a, i) => (
             <li key={a.key} className="group">
-              <div className="flex items-center justify-between text-[13px]">
-                <span className="flex items-center gap-2 text-fg">
-                  <span className="size-2.5 rounded-[3px]" style={{ background: colorAt(i) }} />
-                  {a.label}
+              <div className="flex items-center justify-between gap-2 text-[13px]">
+                <span className="flex min-w-0 items-center gap-2 text-fg">
+                  <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: colorAt(i) }} />
+                  <span className="truncate">{a.label}</span>
                 </span>
-                <span className="flex items-center gap-3">
+                <span className="flex shrink-0 items-center gap-3 whitespace-nowrap">
                   <span className="tnum text-fg-muted">
                     <Money value={a.valueUsd} compact />
                   </span>

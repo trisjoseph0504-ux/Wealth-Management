@@ -13,9 +13,9 @@ export function SectorAllocation({ sectorAllocation }: { sectorAllocation: Alloc
       <CardHeader title="Sector Allocation" subtitle="Look-through exposure" icon={<IconLayers size={16} />} />
       <ul className="flex-1 space-y-3 px-5 py-5">
         {sectorAllocation.map((s, i) => (
-          <li key={s.label} className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5">
-            <span className="text-[13px] text-fg">{s.label}</span>
-            <span className="flex items-center gap-3 text-[13px]">
+          <li key={s.label} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5">
+            <span className="min-w-0 truncate text-[13px] text-fg">{s.label}</span>
+            <span className="flex shrink-0 items-center gap-3 whitespace-nowrap text-[13px]">
               <Money value={s.value} compact className="text-fg-subtle" />
               <span className="tnum w-12 text-right font-medium text-fg">{s.weightPct.toFixed(1)}%</span>
             </span>

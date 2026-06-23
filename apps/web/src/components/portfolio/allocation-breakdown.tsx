@@ -24,15 +24,15 @@ export function AllocationBreakdown({ assetAllocation }: { assetAllocation: Allo
             }
           />
         </div>
-        <ul className="w-full flex-1 space-y-2.5">
+        <ul className="w-full min-w-0 flex-1 space-y-2.5">
           {assetAllocation.map((a, i) => (
             <li key={a.label}>
-              <div className="flex items-center justify-between text-[13px]">
-                <span className="flex items-center gap-2 text-fg">
-                  <span className="size-2.5 rounded-[3px]" style={{ background: colorAt(i) }} />
-                  {a.label}
+              <div className="flex items-center justify-between gap-2 text-[13px]">
+                <span className="flex min-w-0 items-center gap-2 text-fg">
+                  <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: colorAt(i) }} />
+                  <span className="truncate">{a.label}</span>
                 </span>
-                <span className="flex items-center gap-3">
+                <span className="flex shrink-0 items-center gap-3 whitespace-nowrap">
                   <Money value={a.value} compact className="text-fg-muted" />
                   <span className="tnum w-12 text-right font-medium text-fg">{a.weightPct.toFixed(1)}%</span>
                 </span>

@@ -82,7 +82,7 @@ export default async function DashboardPage() {
       <PortfolioOverview p={p} />
 
       {/* Row 2 — allocation + watchlist */}
-      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
         <AllocationSection allocation={allocation} />
         <WatchlistPreview />
       </div>
