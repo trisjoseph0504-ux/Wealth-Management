@@ -335,7 +335,8 @@ function AddHoldingForm({ onDone }: { onDone: () => void }) {
   const [error, setError] = useState<string | null>(null);
   const [priceLoading, setPriceLoading] = useState(false);
 
-  // On picking a symbol, prefill the average cost with the live price (editable).
+  // On picking a symbol, fill the average cost with the live price. The field is
+  // read-only — it auto-fills here (or via the "live" button), never typed into.
   async function pickSymbol(sym: string) {
     setSymbol(sym);
     setPriceLoading(true);
@@ -387,10 +388,12 @@ function AddHoldingForm({ onDone }: { onDone: () => void }) {
           <div className="relative">
             <input
               value={avgCost}
-              onChange={(e) => setAvgCost(e.target.value)}
+              readOnly
+              tabIndex={-1}
               inputMode="decimal"
+              aria-label="Average cost (auto-filled from live price)"
               placeholder={priceLoading ? "Fetching…" : "auto · live price"}
-              className="tnum w-full rounded-[6px] border border-hairline bg-surface px-3 py-2 pr-12 text-[13px] text-fg placeholder:text-fg-subtle focus:border-emerald/40 focus:outline-none"
+              className="tnum pointer-events-none w-full cursor-default select-none rounded-[6px] border border-hairline bg-inset px-3 py-2 pr-12 text-[13px] text-fg placeholder:text-fg-subtle focus:outline-none"
             />
             {symbol.trim() && (
               <button

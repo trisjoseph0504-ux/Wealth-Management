@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { LwWordmark } from "@/components/shell/logo";
 import { NavList } from "@/components/shell/nav-list";
@@ -19,6 +19,9 @@ import { IconMenu, IconClose } from "@/components/ui/icons";
 export function MobileNav() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  // Swipe-to-dismiss: track a leftward drag on the drawer and close past a threshold.
+  const [dragX, setDragX] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
   // Portals need the DOM — only render them after mount (avoids SSR mismatch).
   useEffect(() => setMounted(true), []);
@@ -66,6 +69,20 @@ export function MobileNav() {
               role="dialog"
               aria-modal="true"
               aria-label="Navigation"
+              onTouchStart={(e) => {
+                touchStartX.current = e.touches[0]?.clientX ?? null;
+              }}
+              onTouchMove={(e) => {
+                if (touchStartX.current == null) return;
+                const dx = (e.touches[0]?.clientX ?? 0) - touchStartX.current;
+                if (dx < 0) setDragX(dx); // only follow leftward drags
+              }}
+              onTouchEnd={() => {
+                if (dragX < -60) setOpen(false); // dragged far enough → dismiss
+                setDragX(0);
+                touchStartX.current = null;
+              }}
+              style={dragX ? { transform: `translateX(${dragX}px)`, transition: "none" } : undefined}
               className={cn(
                 "fixed inset-y-0 left-0 z-50 flex w-72 max-w-[82%] flex-col border-r border-hairline bg-canvas shadow-[var(--shadow-elevation)] transition-transform duration-200 ease-out",
                 open ? "translate-x-0" : "-translate-x-full",
