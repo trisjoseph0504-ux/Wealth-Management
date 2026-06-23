@@ -61,7 +61,6 @@ export default async function SignInPage({
                     required
                     autoFocus
                     autoComplete="current-password"
-                    placeholder="••••••••"
                     className="w-full rounded-[6px] border border-hairline bg-inset px-3 py-2.5 text-[13px] text-fg placeholder:text-fg-subtle transition focus:border-emerald/40 focus:outline-none"
                   />
                 </label>
