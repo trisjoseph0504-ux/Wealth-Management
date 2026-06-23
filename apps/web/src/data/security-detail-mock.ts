@@ -57,6 +57,12 @@ export interface PerfPoint {
   label: string;
   pct: number;
 }
+export interface OutlookHorizon {
+  key: string;
+  label: string;
+  returnPct: number;
+  summary: string;
+}
 export interface NewsItem {
   source: string;
   time: string;
@@ -105,7 +111,39 @@ export interface SecurityDetail {
   risks: string[];
   news: NewsItem[];
   chartRanges: ChartRange[];
+  outlook: OutlookHorizon[];
   exposure: SecurityExposure | null;
+}
+
+/** Rules-based per-horizon outlook line (illustrative, not a forecast). */
+function outlookSummary(
+  name: string,
+  theme: string,
+  windowText: string,
+  pct: number,
+  posPct: number,
+  beta: number,
+): string {
+  const dir = pct >= 0 ? "up" : "down";
+  const mom =
+    Math.abs(pct) < 1.5
+      ? "Momentum has been muted"
+      : pct >= 0
+        ? "Momentum has been constructive"
+        : "Momentum has been under pressure";
+  const range =
+    posPct >= 75
+      ? "and it's trading in the upper third of its 52-week range"
+      : posPct <= 30
+        ? "and it sits near the lower end of its 52-week range"
+        : "with the price roughly mid-range over the past year";
+  const risk =
+    beta >= 1.15
+      ? `As a higher-beta name (β ${beta.toFixed(2)}), expect it to amplify market swings`
+      : beta <= 0.85
+        ? `As a lower-beta name (β ${beta.toFixed(2)}), it tends to be steadier than the market`
+        : `Its beta (β ${beta.toFixed(2)}) is roughly in line with the market`;
+  return `Over the ${windowText}, ${name} is ${dir} ${Math.abs(pct).toFixed(1)}%. ${mom} ${range}. ${risk}, with the sector driven by ${theme}.`;
 }
 
 /** Build a deterministic price series ending at `price` with the given return. */
@@ -202,6 +240,25 @@ export function getSecurityDetail(
   const theme = SECTOR_THEME[s.sector];
   const sectorLc = s.sector.toLowerCase();
 
+  // Per-horizon outlook (Daily … All-time), rules-based + deterministic.
+  const posPct = ((s.price - week52Low) / (week52High - week52Low || 1)) * 100;
+  const outlook: OutlookHorizon[] = (
+    [
+      { key: "1D", label: "Daily", windowText: "last session", pct: s.changePct },
+      { key: "1W", label: "Weekly", windowText: "past week", pct: r1w },
+      { key: "1M", label: "Monthly", windowText: "past month", pct: r1m },
+      { key: "5M", label: "5 Months", windowText: "past five months", pct: Number(between(symbol, 41, -14, 26).toFixed(2)) },
+      { key: "1Y", label: "1 Year", windowText: "past year", pct: r1y },
+      { key: "5Y", label: "5 Years", windowText: "past five years", pct: r5y },
+      { key: "ALL", label: "All-time", windowText: "full history on record", pct: Number(between(symbol, 42, 35, 420).toFixed(2)) },
+    ] as const
+  ).map((o) => ({
+    key: o.key,
+    label: o.label,
+    returnPct: o.pct,
+    summary: outlookSummary(s.name, theme, o.windowText, o.pct, posPct, beta),
+  }));
+
   // Exposure reflects the user's REAL holdings when the caller supplies it
   // (passing `null` = confirmed not held). Falls back to the static demo book
   // only when nothing is provided.
@@ -264,6 +321,7 @@ export function getSecurityDetail(
       { source: "Research (mock)", time: "1d ago", headline: `Analysts revisit ${s.symbol} estimates ahead of next print`, tag: "Estimates" },
     ],
     chartRanges,
+    outlook,
     exposure,
   };
 }

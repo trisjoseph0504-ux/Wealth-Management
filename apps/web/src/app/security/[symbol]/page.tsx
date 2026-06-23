@@ -19,6 +19,7 @@ import { SecurityChart } from "@/components/security/security-chart";
 import { KeyStats } from "@/components/security/key-stats";
 import { PerformanceMetrics } from "@/components/security/performance-metrics";
 import { PortfolioExposure } from "@/components/security/portfolio-exposure";
+import { StockOutlook } from "@/components/security/stock-outlook";
 import { InvestmentThesis } from "@/components/security/investment-thesis";
 import { BullBear } from "@/components/security/bull-bear";
 import { NewsFeed } from "@/components/security/news-feed";
@@ -84,6 +85,8 @@ export default async function SecurityPage({ params }: { params: Promise<{ symbo
           <PortfolioExposure d={d} />
         </div>
       </div>
+
+      <StockOutlook d={d} />
 
       <KeyStats d={d} />
 
