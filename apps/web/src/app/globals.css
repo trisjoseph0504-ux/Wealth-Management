@@ -197,10 +197,12 @@
 
 /* 4. Custom utilities (Tailwind v4 `@utility`) */
 
-/* All financial figures: tabular figures, no font wobble between digits. */
+/* All financial figures: tabular figures, no font wobble between digits.
+ * Uses the sans stack (plain, dot-free zero) rather than a monospace fallback
+ * whose default zero carries a center dot; `tabular-nums` keeps digits aligned. */
 @utility tnum {
   font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   letter-spacing: -0.01em;
 }
 
