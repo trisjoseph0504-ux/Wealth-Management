@@ -8,7 +8,8 @@ import { cn } from "@/lib/cn";
 import { IconMenu, IconClose } from "@/components/ui/icons";
 
 /**
- * Hamburger trigger + slide-over drawer. Rendered in the topbar on < lg.
+ * Hamburger trigger + slide-over drawer. Phone-only — shown below `md`; at md+
+ * the persistent sidebar takes over (the "website" layout).
  *
  * The overlay + drawer are portaled to <body>: the topbar uses `backdrop-blur`,
  * which makes it the containing block for `position: fixed` descendants. Left in
@@ -36,7 +37,7 @@ export function MobileNav() {
   }, [open]);
 
   return (
-    <div className="lg:hidden">
+    <div className="md:hidden">
       <button
         type="button"
         aria-label="Open navigation"
@@ -49,7 +50,7 @@ export function MobileNav() {
 
       {mounted &&
         createPortal(
-          <div className="lg:hidden">
+          <div className="md:hidden">
             {/* Overlay */}
             <div
               aria-hidden={!open}

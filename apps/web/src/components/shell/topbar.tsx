@@ -35,12 +35,12 @@ export function Topbar() {
   const title = useRouteTitle();
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-hairline bg-base/80 px-4 backdrop-blur-md md:px-6">
-      <div className="flex items-center gap-2 lg:hidden">
+      <div className="flex items-center gap-2 md:hidden">
         <MobileNav />
         <LwLogo size={26} />
       </div>
 
-      <div className="hidden min-w-0 lg:flex lg:items-center">
+      <div className="hidden min-w-0 md:flex md:items-center">
         <h1 className="truncate text-[15px] font-semibold tracking-tight text-fg">{title}</h1>
       </div>
 

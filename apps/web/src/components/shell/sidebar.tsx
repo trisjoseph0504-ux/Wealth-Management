@@ -1,6 +1,7 @@
 /**
- * Left navigation rail. Fixed on lg+, hidden below (the mobile drawer carries
- * nav there). Nav items + active state come from the shared <NavList>.
+ * Left navigation rail. Fixed on md+ (tablet/desktop "website"), hidden below
+ * where the phone slide-over drawer carries nav. Nav items + active state come
+ * from the shared <NavList>.
  */
 import Link from "next/link";
 import { LwWordmark } from "@/components/shell/logo";
@@ -9,7 +10,7 @@ import { IconSettings } from "@/components/ui/icons";
 
 export function Sidebar() {
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-hairline bg-canvas/80 lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-hairline bg-canvas/80 md:flex">
       <div className="flex h-16 items-center border-b border-hairline px-5">
         <LwWordmark />
       </div>
