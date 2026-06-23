@@ -1,13 +1,17 @@
 "use client";
 
 /**
- * AI Winner Analysis for the Compare page. Reads the selected securities and
- * writes a high-level take on which is the strongest and the scenarios each
- * thrives in (folding in bull/bear). Rules-based and informational-only; the
- * "Generate" action gives it an on-demand feel. Stays in sync with the set.
+ * AI Winner Analysis for the Compare page. On "Generate" it asks Claude (Anthropic
+ * API) for a grounded read on the selected securities — which is strongest and the
+ * scenarios each thrives in, folding in bull/bear — and falls back to a rules-based
+ * synthesis when no API key is configured. Informational-only. Re-generate after
+ * changing the set (the result is tied to the exact symbols it was generated for).
  */
 import { useState, type ReactNode } from "react";
-import { buildCompareAnalysis } from "@/data/compare-analysis";
+import {
+  generateCompareAnalysisAction,
+  type CompareAnalysisResult,
+} from "@/server/actions/compare-analysis";
 import type { CompareCard } from "@/server/actions/compare";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, Button, EmptyState } from "@/components/ui/primitives";
@@ -26,17 +30,21 @@ function rich(text: string): ReactNode[] {
 }
 
 export function CompareAnalysis({ cards }: { cards: CompareCard[] }) {
-  const [generated, setGenerated] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [out, setOut] = useState<{ data: CompareAnalysisResult; sig: string } | null>(null);
 
-  const analysis = buildCompareAnalysis(cards);
+  const hasEnough = cards.length >= 2;
+  const sig = cards.map((c) => c.symbol).join(",");
+  const shown = out && out.sig === sig ? out.data : null;
 
-  function generate() {
+  async function generate() {
     setBusy(true);
-    setTimeout(() => {
+    try {
+      const res = await generateCompareAnalysisAction(cards);
+      if (res) setOut({ data: res, sig });
+    } finally {
       setBusy(false);
-      setGenerated(true);
-    }, 550);
+    }
   }
 
   return (
@@ -45,10 +53,16 @@ export function CompareAnalysis({ cards }: { cards: CompareCard[] }) {
         title="AI Winner Analysis"
         subtitle="High-level read on the selected securities"
         icon={<IconSparkles size={16} />}
-        action={<Badge tone="emerald">Beta</Badge>}
+        action={
+          shown ? (
+            <Badge tone={shown.ai ? "emerald" : "neutral"}>{shown.ai ? "Live AI" : "Illustrative"}</Badge>
+          ) : (
+            <Badge tone="emerald">Beta</Badge>
+          )
+        }
       />
 
-      {!analysis ? (
+      {!hasEnough ? (
         <EmptyState
           icon={<IconShield size={18} />}
           title="Add two or more to analyze"
@@ -56,7 +70,7 @@ export function CompareAnalysis({ cards }: { cards: CompareCard[] }) {
         />
       ) : (
         <div className="px-5 py-5">
-          {!generated ? (
+          {!shown ? (
             <div className="rounded-[8px] border border-dashed border-line-strong bg-inset/40 px-5 py-6 text-center">
               <p className="text-[13px] text-fg-muted">
                 Generate a high-level analysis of {cards.map((c) => c.symbol).join(", ")} — which is the strongest
@@ -71,9 +85,13 @@ export function CompareAnalysis({ cards }: { cards: CompareCard[] }) {
             <div className="space-y-3.5">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-fg-subtle">Strongest</span>
-                <Badge tone="emerald">{analysis.winner}</Badge>
+                <Badge tone="emerald">{shown.winner}</Badge>
+                <Button variant="outline" onClick={generate} disabled={busy} className="ml-auto">
+                  <IconSparkles size={14} />
+                  {busy ? "Analyzing…" : "Regenerate"}
+                </Button>
               </div>
-              {analysis.paragraphs.map((p, i) => (
+              {shown.paragraphs.map((p, i) => (
                 <p key={i} className="text-[14px] leading-relaxed text-fg-muted" style={{ fontFamily: "var(--font-serif)" }}>
                   {rich(p)}
                 </p>
@@ -82,8 +100,9 @@ export function CompareAnalysis({ cards }: { cards: CompareCard[] }) {
           )}
 
           <p className="mt-5 text-[10px] leading-relaxed text-fg-subtle">
-            <span className="font-medium text-fg-muted">Disclaimer.</span> A rules-based synthesis of the metrics shown,
-            for informational purposes only — not personalized investment advice or a recommendation to buy or sell.
+            <span className="font-medium text-fg-muted">Disclaimer.</span> {shown?.ai ? "AI-generated" : "A rules-based"} synthesis
+            of the metrics shown, for informational purposes only — may be inaccurate, and is not personalized investment advice
+            or a recommendation to buy or sell.
           </p>
         </div>
       )}
