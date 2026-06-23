@@ -20,6 +20,12 @@ const schema = z.object({
   /** Optional site password. When set, the whole app is gated behind it; when
    *  unset (e.g. local dev), the app is open. */
   SITE_PASSWORD: z.string().min(1).optional(),
+  /** Optional Anthropic API key. When set, AI Market Commentary is generated live
+   *  by Claude; when unset, it falls back to the rules-based generator. */
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  /** Optional model override for the commentary (defaults to claude-opus-4-8).
+   *  Set to claude-sonnet-4-6 or claude-haiku-4-5 to cut per-use cost. */
+  ANTHROPIC_MODEL: z.string().min(1).optional(),
 });
 
 const parsed = schema.parse({
@@ -29,6 +35,8 @@ const parsed = schema.parse({
   MARKET_DATA_PROVIDER: process.env.MARKET_DATA_PROVIDER,
   FINNHUB_API_KEY: process.env.FINNHUB_API_KEY,
   SITE_PASSWORD: process.env.SITE_PASSWORD,
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+  ANTHROPIC_MODEL: process.env.ANTHROPIC_MODEL,
 });
 
 if (parsed.DATA_SOURCE === "db" && !parsed.DATABASE_URL) {

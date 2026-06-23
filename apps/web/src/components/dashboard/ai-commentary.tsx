@@ -1,34 +1,39 @@
 "use client";
 
 /**
- * AI Market Commentary. Generates plain-language commentary derived from the live
- * portfolio + risk + market data (passed as `variants`). Templated and clearly
- * labeled informational-only — the mandatory non-advice disclaimer ships with the
- * feature (SECURITY.md §7). "Regenerate" cycles through different analytical angles.
+ * AI Market Commentary. Each click re-assesses the LIVE portfolio + risk and asks
+ * Claude (Anthropic API) for a fresh, grounded commentary — falling back to a
+ * rules-based take when no API key is configured. Clearly labeled informational-
+ * only; the mandatory non-advice disclaimer ships with the feature (SECURITY.md
+ * §7). "Regenerate" rotates the analytical angle and re-prompts.
  */
 import { useState } from "react";
+import { generateCommentaryAction } from "@/server/actions/commentary";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Badge, Button } from "@/components/ui/primitives";
 import { IconSparkles, IconClock } from "@/components/ui/icons";
 
-export function AiCommentary({ variants }: { variants: string[] }) {
+export function AiCommentary() {
   const [text, setText] = useState<string | null>(null);
   const [idx, setIdx] = useState(0);
   const [busy, setBusy] = useState(false);
   const [stamp, setStamp] = useState<string | null>(null);
+  const [live, setLive] = useState(false);
 
-  function generate(nextIdx: number) {
+  async function generate(nextIdx: number) {
     setBusy(true);
     setText(null);
-    // Brief synthesis delay for feel; data is already on hand.
-    setTimeout(() => {
-      setText(variants[nextIdx % variants.length] ?? variants[0] ?? "");
+    try {
+      const res = await generateCommentaryAction(nextIdx);
+      setText(res.text);
+      setLive(res.ai);
       setIdx(nextIdx);
       setStamp(
         new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", hour12: true }).format(new Date()),
       );
+    } finally {
       setBusy(false);
-    }, 520);
+    }
   }
 
   return (
@@ -39,7 +44,8 @@ export function AiCommentary({ variants }: { variants: string[] }) {
         icon={<IconSparkles size={16} />}
         action={
           stamp ? (
-            <span className="inline-flex items-center gap-1.5 text-[11px] text-fg-subtle">
+            <span className="inline-flex items-center gap-2 text-[11px] text-fg-subtle">
+              <Badge tone={live ? "emerald" : "neutral"}>{live ? "Live AI" : "Illustrative"}</Badge>
               <IconClock size={12} /> {stamp}
             </span>
           ) : (
@@ -81,7 +87,7 @@ export function AiCommentary({ variants }: { variants: string[] }) {
                   Regenerate
                 </Button>
                 <span className="text-[11px] text-fg-subtle">
-                  Angle {(idx % variants.length) + 1} of {variants.length}
+                  Angle {(idx % 4) + 1} of 4 · {live ? "Claude" : "rules-based"}
                 </span>
               </>
             )}

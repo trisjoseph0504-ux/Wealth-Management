@@ -15,6 +15,7 @@
     "db:seed": "tsx src/server/db/seed.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.105.0",
     "@auth/drizzle-adapter": "^1.11.2",
     "drizzle-orm": "^0.45.2",
     "next": "^15.5.19",

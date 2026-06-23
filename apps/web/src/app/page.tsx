@@ -8,7 +8,6 @@ import { listHoldingsAction } from "@/server/actions/holdings";
 import { buildPortfolio } from "@/data/portfolio-derive";
 import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { buildRiskAnalysis } from "@/data/risk-mock";
-import { buildMarketCommentary } from "@/data/commentary";
 import { portfolio as demoTrend, type PortfolioSummary, type RiskSnapshot as RiskSnapshotData } from "@/data/mock";
 import { PortfolioOverview } from "@/components/dashboard/portfolio-overview";
 import { AllocationSection } from "@/components/dashboard/allocation-section";
@@ -85,7 +84,7 @@ export default async function DashboardPage() {
 
       {/* Row 4 — intelligence: AI commentary (wide) + risk snapshot */}
       <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <AiCommentary variants={buildMarketCommentary(view, risk)} />
+        <AiCommentary />
         <RiskSnapshot risk={riskSnapshot} />
       </div>
 
