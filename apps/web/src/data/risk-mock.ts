@@ -347,17 +347,20 @@ export function buildRebalanceAdvice(view: PortfolioView, risk: RiskAnalysis): R
   const usd = (n: number) =>
     `${n < 0 ? "-" : ""}$${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
 
-  const highScore = m.riskScore >= 70;
+  // Flag as risk climbs into the high (orange/red) part of the gauge, not only at the top.
+  const highScore = m.riskScore >= 65;
   const highConc = c.top1Pct >= 30 || c.effectiveN < 4;
   const highBeta = m.portfolioBeta >= 1.15;
   const highVol = m.portfolioVol >= 24;
   if (!(highScore || highConc || highBeta || highVol)) return null;
 
-  const level: "elevated" | "high" = m.riskScore >= 80 || c.top1Pct >= 45 ? "high" : "elevated";
+  const level: "elevated" | "high" = m.riskScore >= 78 || c.top1Pct >= 45 ? "high" : "elevated";
 
   const reasons: string[] = [];
   if (highScore)
-    reasons.push(`Composite risk is ${m.riskScore} (${m.riskTier}) — toward the aggressive end of the 0–100 scale.`);
+    reasons.push(
+      `Composite risk is ${m.riskScore} (${m.riskTier}) — ${m.riskScore >= 75 ? "toward the aggressive end" : "climbing into the high end"} of the 0–100 scale.`,
+    );
   if (top && c.top1Pct >= 30)
     reasons.push(`${top.symbol} alone is ${c.top1Pct.toFixed(1)}% of the book, so a single name drives much of the outcome.`);
   if (c.top5Pct >= 70 || c.effectiveN < 4)

@@ -34,26 +34,23 @@ export function RiskGauge({ score }: { score: number }) {
       setShown(true);
       return;
     }
-    const rafShow = requestAnimationFrame(() => {
-      setShown(true);
-      setFill(target); // CSS transition tweens the arc fill
-    });
-    // Count the number up with an easeOutCubic over ~950ms.
-    const dur = 950;
+    setShown(true);
+    // Shoot up fast, then creep into the final value (credit-score style) — drive
+    // both the arc fill and the number off one easeOutExpo loop so they stay synced.
+    const dur = 2200;
+    const easeOutExpo = (p: number) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p));
     let start: number | null = null;
     let id = 0;
     const step = (t: number) => {
       if (start == null) start = t;
       const p = Math.min(1, (t - start) / dur);
-      const eased = 1 - Math.pow(1 - p, 3);
-      setDisplay(Math.round(score * eased));
+      const e = easeOutExpo(p);
+      setFill(target * e);
+      setDisplay(Math.round(score * e));
       if (p < 1) id = requestAnimationFrame(step);
     };
     id = requestAnimationFrame(step);
-    return () => {
-      cancelAnimationFrame(rafShow);
-      cancelAnimationFrame(id);
-    };
+    return () => cancelAnimationFrame(id);
   }, [score, target]);
 
   const color = riskColor(score);
@@ -79,7 +76,6 @@ export function RiskGauge({ score }: { score: number }) {
           strokeLinecap="round"
           strokeDasharray={ARC}
           strokeDashoffset={ARC * (1 - fill)}
-          style={{ transition: "stroke-dashoffset 1050ms cubic-bezier(0.22, 1, 0.36, 1)" }}
         />
       </svg>
       <div className="absolute inset-x-0 bottom-1 flex flex-col items-center">
