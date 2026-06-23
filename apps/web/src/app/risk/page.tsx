@@ -5,6 +5,7 @@
  */
 import { listHoldingsAction } from "@/server/actions/holdings";
 import { buildPortfolio } from "@/data/portfolio-derive";
+import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { buildRiskAnalysis } from "@/data/risk-mock";
 import { RiskSummary } from "@/components/risk/risk-summary";
 import { RiskTrend } from "@/components/risk/risk-trend";
@@ -19,7 +20,9 @@ import { IconShield } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
 export default async function RiskPage() {
-  const view = buildPortfolio(await listHoldingsAction());
+  const raw = await listHoldingsAction();
+  const quotes = await fetchHoldingQuotes(raw.map((h) => h.symbol));
+  const view = buildPortfolio(raw, quotes);
   const risk = buildRiskAnalysis(view);
   const hasData = risk.holdingRisks.length > 0;
 

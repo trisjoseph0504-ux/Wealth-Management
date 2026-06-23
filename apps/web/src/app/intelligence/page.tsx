@@ -7,6 +7,7 @@
 import { listHoldingsAction } from "@/server/actions/holdings";
 import { listWatchlistsAction } from "@/server/actions/watchlists";
 import { buildPortfolio } from "@/data/portfolio-derive";
+import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { buildRiskAnalysis } from "@/data/risk-mock";
 import { buildIntelligence } from "@/data/intelligence-mock";
 import { getMarketNews, getCompanyNews } from "@/server/market/news";
@@ -18,7 +19,9 @@ import { SectionLabel } from "@/components/ui/primitives";
 export const dynamic = "force-dynamic";
 
 export default async function IntelligencePage() {
-  const view = buildPortfolio(await listHoldingsAction());
+  const raw = await listHoldingsAction();
+  const quotes = await fetchHoldingQuotes(raw.map((h) => h.symbol));
+  const view = buildPortfolio(raw, quotes);
   const risk = buildRiskAnalysis(view);
   const { insights, briefing } = buildIntelligence(view, risk);
 

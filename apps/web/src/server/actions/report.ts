@@ -7,6 +7,7 @@
  */
 import { listHoldingsAction } from "@/server/actions/holdings";
 import { buildPortfolio } from "@/data/portfolio-derive";
+import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { buildRiskAnalysis } from "@/data/risk-mock";
 
 const usd = (n: number) =>
@@ -14,7 +15,9 @@ const usd = (n: number) =>
 const pct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(2)}%`;
 
 export async function generatePortfolioReportAction(): Promise<{ filename: string; content: string }> {
-  const view = buildPortfolio(await listHoldingsAction());
+  const raw = await listHoldingsAction();
+  const quotes = await fetchHoldingQuotes(raw.map((h) => h.symbol));
+  const view = buildPortfolio(raw, quotes);
   const risk = buildRiskAnalysis(view);
   const s = view.summary;
   const m = risk.riskModel;

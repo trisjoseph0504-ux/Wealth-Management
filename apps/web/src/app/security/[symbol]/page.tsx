@@ -10,6 +10,7 @@ import { notFound } from "next/navigation";
 import { getSecurityDetail, type LiveOverride } from "@/data/security-detail-mock";
 import { getSecurity } from "@/data/markets-mock";
 import { getMarketData } from "@/server/market";
+import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { getCompanyNews } from "@/server/market/news";
 import { analyzeNews } from "@/data/news-analysis";
 import { listHoldingsAction } from "@/server/actions/holdings";
@@ -48,7 +49,9 @@ export default async function SecurityPage({ params }: { params: Promise<{ symbo
     : undefined;
 
   // Real portfolio exposure for this symbol (null = genuinely not held).
-  const view = buildPortfolio(await listHoldingsAction());
+  const rawHoldings = await listHoldingsAction();
+  const holdingQuotes = await fetchHoldingQuotes(rawHoldings.map((h) => h.symbol));
+  const view = buildPortfolio(rawHoldings, holdingQuotes);
   const heldLive = view.holdings.find((h) => h.symbol === sym);
   const liveExposure = heldLive
     ? {
