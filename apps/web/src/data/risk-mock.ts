@@ -324,3 +324,59 @@ export function buildRiskAnalysis(view: PortfolioView): RiskAnalysis {
     riskModel,
   };
 }
+
+/* ── rebalance guidance ───────────────────────────────────────────────────── */
+export interface RebalanceAdvice {
+  level: "elevated" | "high";
+  targetTier: string;
+  reasons: string[]; // why risk is flagged
+  suggestions: string[]; // what to consider rebalancing toward
+}
+
+/**
+ * If the book's risk is running hot, return a plain-language explanation of WHY
+ * plus what to consider rebalancing toward — all derived from the live model.
+ * Returns null when nothing is flagged (so the UI shows no alert).
+ */
+export function buildRebalanceAdvice(view: PortfolioView, risk: RiskAnalysis): RebalanceAdvice | null {
+  const m = risk.riskModel;
+  const c = risk.concentration;
+  const top = risk.concentrationHoldings.find((h) => h.assetClass !== "Cash");
+  const sector = view.sectorAllocation[0];
+  const spx10 = risk.scenarios.find((s) => s.id === "spx10");
+  const usd = (n: number) =>
+    `${n < 0 ? "-" : ""}$${Math.abs(n).toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+
+  const highScore = m.riskScore >= 70;
+  const highConc = c.top1Pct >= 30 || c.effectiveN < 4;
+  const highBeta = m.portfolioBeta >= 1.15;
+  const highVol = m.portfolioVol >= 24;
+  if (!(highScore || highConc || highBeta || highVol)) return null;
+
+  const level: "elevated" | "high" = m.riskScore >= 80 || c.top1Pct >= 45 ? "high" : "elevated";
+
+  const reasons: string[] = [];
+  if (highScore)
+    reasons.push(`Composite risk is ${m.riskScore} (${m.riskTier}) — toward the aggressive end of the 0–100 scale.`);
+  if (top && c.top1Pct >= 30)
+    reasons.push(`${top.symbol} alone is ${c.top1Pct.toFixed(1)}% of the book, so a single name drives much of the outcome.`);
+  if (c.top5Pct >= 70 || c.effectiveN < 4)
+    reasons.push(`The top five holdings are ${c.top5Pct.toFixed(1)}% of the portfolio — about ${c.effectiveN.toFixed(1)} effective positions.`);
+  if (highBeta)
+    reasons.push(
+      `Portfolio beta is ${m.portfolioBeta.toFixed(2)}, so the book swings more than the market${spx10 ? ` — a 10% S&P drop models to roughly ${spx10.portfolioImpactPct.toFixed(1)}% (${usd(spx10.portfolioImpactUsd)})` : ""}.`,
+    );
+  if (highVol) reasons.push(`Annualized volatility is about ${m.portfolioVol.toFixed(0)}%, on the higher side.`);
+
+  const cap = Math.max(15, Math.round((c.top1Pct * 0.6) / 5) * 5);
+  const suggestions: string[] = [];
+  if (top && c.top1Pct >= 25)
+    suggestions.push(`Trim ${top.symbol} toward a ~${cap}% cap to cut single-name dependence.`);
+  suggestions.push(`Add lower-beta or defensive sleeves — broad bonds (AGG), Treasuries (TLT), gold (GLD), or consumer staples — to dampen swings.`);
+  if (sector)
+    suggestions.push(`Spread across more sectors; ${sector.label.toLowerCase()} is ${sector.weightPct.toFixed(0)}% of exposure today.`);
+  suggestions.push(`Raise cash as dry powder to lower risk quickly without picking new names.`);
+
+  const targetTier = m.riskScore >= 78 ? "Growth" : "Balanced";
+  return { level, targetTier, reasons, suggestions };
+}

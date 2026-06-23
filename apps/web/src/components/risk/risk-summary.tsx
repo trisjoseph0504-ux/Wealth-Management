@@ -6,6 +6,7 @@ import { Money, Percent } from "@/components/ui/financial";
 import { Badge, SectionLabel } from "@/components/ui/primitives";
 import { IconShield } from "@/components/ui/icons";
 import { InfoPopover, type InfoContent } from "@/components/ui/info-popover";
+import { RiskGauge } from "@/components/risk/risk-gauge";
 
 const RATIO_INFO: Record<string, InfoContent> = {
   beta: {
@@ -52,37 +53,6 @@ const TIER_TONE: Record<RiskTier, "emerald" | "info" | "warn" | "danger"> = {
   Growth: "warn",
   Aggressive: "danger",
 };
-const TIER_COLOR: Record<RiskTier, string> = {
-  Conservative: "var(--color-pos)",
-  Balanced: "var(--color-info)",
-  Growth: "var(--color-warn)",
-  Aggressive: "var(--color-neg)",
-};
-
-function Gauge({ score, color }: { score: number; color: string }) {
-  const pct = Math.min(Math.max(score, 0), 100) / 100;
-  return (
-    <div className="relative h-[110px] w-[200px]">
-      <svg viewBox="0 0 200 110" className="h-full w-full">
-        <path d="M16 102 A84 84 0 0 1 184 102" fill="none" stroke="var(--color-inset)" strokeWidth="12" strokeLinecap="round" />
-        <path
-          d="M16 102 A84 84 0 0 1 184 102"
-          fill="none"
-          stroke={color}
-          strokeWidth="12"
-          strokeLinecap="round"
-          strokeDasharray={Math.PI * 84}
-          strokeDashoffset={Math.PI * 84 * (1 - pct)}
-        />
-      </svg>
-      <div className="absolute inset-x-0 bottom-1 flex flex-col items-center">
-        <span className="tnum text-4xl font-semibold tracking-tight text-fg">{score}</span>
-        <span className="text-[10px] uppercase tracking-[0.16em] text-fg-subtle">Composite Risk</span>
-      </div>
-    </div>
-  );
-}
-
 export function RiskSummary({ model }: { model: RiskModel }) {
   const m = model;
   return (
@@ -95,7 +65,7 @@ export function RiskSummary({ model }: { model: RiskModel }) {
       />
       <div className="grid gap-px bg-hairline lg:grid-cols-[1fr_1.2fr]">
         <div className="flex flex-col items-center justify-center gap-1 bg-surface px-6 py-6">
-          <Gauge score={m.riskScore} color={TIER_COLOR[m.riskTier]} />
+          <RiskGauge score={m.riskScore} />
           <p className="mt-1 max-w-[15rem] text-center text-[11px] leading-relaxed text-fg-subtle">
             Blends beta, volatility, concentration, and drawdown into a single 0–100 read.
           </p>

@@ -6,8 +6,9 @@
 import { listHoldingsAction } from "@/server/actions/holdings";
 import { buildPortfolio } from "@/data/portfolio-derive";
 import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
-import { buildRiskAnalysis } from "@/data/risk-mock";
+import { buildRiskAnalysis, buildRebalanceAdvice } from "@/data/risk-mock";
 import { RiskSummary } from "@/components/risk/risk-summary";
+import { RebalanceAlert } from "@/components/risk/rebalance-alert";
 import { RiskTrend } from "@/components/risk/risk-trend";
 import { Concentration } from "@/components/risk/concentration";
 import { SectorExposure } from "@/components/risk/sector-exposure";
@@ -24,6 +25,7 @@ export default async function RiskPage() {
   const quotes = await fetchHoldingQuotes(raw.map((h) => h.symbol));
   const view = buildPortfolio(raw, quotes);
   const risk = buildRiskAnalysis(view);
+  const rebalance = buildRebalanceAdvice(view, risk);
   const hasData = risk.holdingRisks.length > 0;
 
   return (
@@ -46,6 +48,7 @@ export default async function RiskPage() {
         </Card>
       ) : (
         <>
+          {rebalance && <RebalanceAlert advice={rebalance} />}
           <RiskSummary model={risk.riskModel} />
           <RiskTrend trend={risk.riskTrend} />
           <div className="grid gap-6 lg:grid-cols-2">
