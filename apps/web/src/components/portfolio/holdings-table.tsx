@@ -10,6 +10,7 @@ import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { ASSET_CLASSES, type Holding, type AssetClass } from "@/data/portfolio-mock";
 import { addHoldingAction, removeHoldingAction } from "@/server/actions/holdings";
+import { getQuoteAction } from "@/server/actions/market";
 import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/format";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -18,7 +19,7 @@ import { Button, EmptyState } from "@/components/ui/primitives";
 import { SymbolCombobox } from "@/components/ui/symbol-combobox";
 import { TickerLink, tickerMenuItems } from "@/components/ui/ticker-link";
 import { useContextMenu } from "@/components/ui/context-menu";
-import { IconSearch, IconLayers, IconArrowUp, IconArrowDown, IconPlus, IconTrash, IconClose } from "@/components/ui/icons";
+import { IconSearch, IconLayers, IconArrowUp, IconArrowDown, IconPlus, IconTrash, IconClose, IconPencil, IconCheck } from "@/components/ui/icons";
 
 type SortKey = "symbol" | "assetClass" | "quantity" | "price" | "marketValue" | "dayChangePct" | "gainUsd" | "weightPct";
 type SortDir = "asc" | "desc";
@@ -181,6 +182,91 @@ export function HoldingsTable({ holdings }: { holdings: Holding[] }) {
 function HoldingRow({ h, onRemove }: { h: Holding; onRemove: () => void }) {
   const router = useRouter();
   const { openMenu } = useContextMenu();
+  const [editing, setEditing] = useState(false);
+  const [qty, setQty] = useState(String(h.quantity));
+  const [cost, setCost] = useState(String(h.avgCost));
+  const [pending, startTransition] = useTransition();
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function startEdit() {
+    setQty(String(h.quantity));
+    setCost(String(h.avgCost));
+    setError(null);
+    setEditing(true);
+  }
+
+  function save() {
+    setError(null);
+    startTransition(async () => {
+      const res = await addHoldingAction(h.symbol, Number(qty), Number(cost));
+      if (res && typeof res === "object" && "error" in res) {
+        setError(res.error);
+        return;
+      }
+      setEditing(false);
+      router.refresh();
+    });
+  }
+
+  async function useLivePrice() {
+    setPriceLoading(true);
+    try {
+      const q = await getQuoteAction(h.symbol);
+      if (q && q.price > 0) setCost(q.price.toFixed(2));
+    } finally {
+      setPriceLoading(false);
+    }
+  }
+
+  if (editing) {
+    return (
+      <tr className="border-b border-hairline/60 bg-inset/40 last:border-0">
+        <td colSpan={COLUMNS.length + 1} className="px-4 py-3.5">
+          <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+            <span className="pb-1.5 text-[13px] font-semibold tracking-tight text-fg">{h.symbol}</span>
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-[0.1em] text-fg-subtle">Quantity</span>
+              <input
+                value={qty}
+                onChange={(e) => setQty(e.target.value)}
+                inputMode="decimal"
+                autoFocus
+                className="tnum w-28 rounded-[6px] border border-hairline bg-surface px-3 py-1.5 text-[13px] text-fg focus:border-emerald/40 focus:outline-none"
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1 block text-[10px] font-medium uppercase tracking-[0.1em] text-fg-subtle">Avg cost</span>
+              <input
+                value={cost}
+                onChange={(e) => setCost(e.target.value)}
+                inputMode="decimal"
+                className="tnum w-28 rounded-[6px] border border-hairline bg-surface px-3 py-1.5 text-[13px] text-fg focus:border-emerald/40 focus:outline-none"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={useLivePrice}
+              disabled={priceLoading}
+              className="reduce-motion-safe pb-2 text-[11px] font-medium text-emerald transition hover:text-emerald-bright disabled:opacity-60"
+            >
+              {priceLoading ? "Fetching…" : "Use live price"}
+            </button>
+            <div className="ml-auto flex items-center gap-2 pb-0.5">
+              <Button variant="primary" onClick={save} disabled={pending} className="h-[34px]">
+                {pending ? "Saving…" : (<><IconCheck size={14} /> Save</>)}
+              </Button>
+              <button type="button" onClick={() => setEditing(false)} className="text-[12px] text-fg-subtle transition hover:text-fg">
+                Cancel
+              </button>
+            </div>
+          </div>
+          {error && <p className="mt-2 text-[12px] text-neg">{error}</p>}
+        </td>
+      </tr>
+    );
+  }
+
   return (
     <tr
       className="group reduce-motion-safe border-b border-hairline/60 transition last:border-0 hover:bg-surface-2/40"
@@ -188,11 +274,11 @@ function HoldingRow({ h, onRemove }: { h: Holding; onRemove: () => void }) {
         openMenu(e, [
           ...tickerMenuItems(h.symbol, router),
           { separator: true, label: "" },
+          { label: "Edit holding", icon: <IconPencil size={14} />, onSelect: startEdit },
           { label: "Remove holding", icon: <IconTrash size={14} />, danger: true, onSelect: onRemove },
         ])
       }
     >
-
       <td className="px-4 py-3">
         <TickerLink symbol={h.symbol} className="block w-fit font-semibold tracking-tight text-fg" />
         <div className="max-w-[180px] truncate text-[11px] text-fg-subtle">{h.name}</div>
@@ -215,14 +301,26 @@ function HoldingRow({ h, onRemove }: { h: Holding; onRemove: () => void }) {
       </td>
       <td className="px-4 py-3 text-right tnum text-fg">{h.weightPct.toFixed(1)}%</td>
       <td className="px-2 py-3 text-right">
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={`Remove ${h.symbol}`}
-          className="reduce-motion-safe inline-flex size-7 items-center justify-center rounded-[4px] text-fg-subtle opacity-0 transition hover:bg-surface hover:text-neg focus-visible:opacity-100 group-hover:opacity-100"
-        >
-          <IconTrash size={15} />
-        </button>
+        <div className="flex items-center justify-end gap-0.5">
+          <button
+            type="button"
+            onClick={startEdit}
+            aria-label={`Edit ${h.symbol}`}
+            title="Edit"
+            className="reduce-motion-safe inline-flex size-7 items-center justify-center rounded-[4px] text-fg-subtle opacity-0 transition hover:bg-surface hover:text-emerald focus-visible:opacity-100 group-hover:opacity-100"
+          >
+            <IconPencil size={15} />
+          </button>
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label={`Remove ${h.symbol}`}
+            title="Remove"
+            className="reduce-motion-safe inline-flex size-7 items-center justify-center rounded-[4px] text-fg-subtle opacity-0 transition hover:bg-surface hover:text-neg focus-visible:opacity-100 group-hover:opacity-100"
+          >
+            <IconTrash size={15} />
+          </button>
+        </div>
       </td>
     </tr>
   );
@@ -235,6 +333,19 @@ function AddHoldingForm({ onDone }: { onDone: () => void }) {
   const [quantity, setQuantity] = useState("");
   const [avgCost, setAvgCost] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [priceLoading, setPriceLoading] = useState(false);
+
+  // On picking a symbol, prefill the average cost with the live price (editable).
+  async function pickSymbol(sym: string) {
+    setSymbol(sym);
+    setPriceLoading(true);
+    try {
+      const q = await getQuoteAction(sym);
+      if (q && q.price > 0) setAvgCost(q.price.toFixed(2));
+    } finally {
+      setPriceLoading(false);
+    }
+  }
 
   function submit() {
     setError(null);
@@ -259,7 +370,7 @@ function AddHoldingForm({ onDone }: { onDone: () => void }) {
           <SymbolCombobox
             value={symbol}
             onChange={setSymbol}
-            onSelect={(hit) => setSymbol(hit.symbol)}
+            onSelect={(hit) => pickSymbol(hit.symbol)}
             placeholder="Search e.g. Apple or AAPL"
           />
         </Field>
@@ -273,13 +384,26 @@ function AddHoldingForm({ onDone }: { onDone: () => void }) {
           />
         </Field>
         <Field label="Avg cost">
-          <input
-            value={avgCost}
-            onChange={(e) => setAvgCost(e.target.value)}
-            inputMode="decimal"
-            placeholder="150.00"
-            className="tnum w-full rounded-[6px] border border-hairline bg-surface px-3 py-2 text-[13px] text-fg placeholder:text-fg-subtle focus:border-emerald/40 focus:outline-none"
-          />
+          <div className="relative">
+            <input
+              value={avgCost}
+              onChange={(e) => setAvgCost(e.target.value)}
+              inputMode="decimal"
+              placeholder={priceLoading ? "Fetching…" : "auto · live price"}
+              className="tnum w-full rounded-[6px] border border-hairline bg-surface px-3 py-2 pr-12 text-[13px] text-fg placeholder:text-fg-subtle focus:border-emerald/40 focus:outline-none"
+            />
+            {symbol.trim() && (
+              <button
+                type="button"
+                onClick={() => pickSymbol(symbol.trim().toUpperCase())}
+                disabled={priceLoading}
+                title="Fill with the live price"
+                className="reduce-motion-safe absolute right-2 top-1/2 -translate-y-1/2 rounded-[4px] px-1.5 py-0.5 text-[10px] font-semibold text-emerald transition hover:bg-emerald/10 disabled:opacity-60"
+              >
+                live
+              </button>
+            )}
+          </div>
         </Field>
         <Button variant="primary" onClick={submit} disabled={pending} className="h-[38px] justify-center">
           {pending ? "Adding…" : "Add holding"}

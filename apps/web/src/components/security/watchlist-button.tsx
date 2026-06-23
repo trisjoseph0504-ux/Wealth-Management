@@ -17,10 +17,11 @@ import {
   addWatchlistItemAction,
   removeWatchlistItemAction,
   createWatchlistAction,
+  deleteWatchlistAction,
 } from "@/server/actions/watchlists";
 import type { Watchlist } from "@/server/data/types";
 import { Button } from "@/components/ui/primitives";
-import { IconStar, IconStarFilled, IconCheck, IconPlus } from "@/components/ui/icons";
+import { IconStar, IconStarFilled, IconCheck, IconPlus, IconTrash } from "@/components/ui/icons";
 import { cn } from "@/lib/cn";
 
 export function WatchlistButton({ symbol }: { symbol: string }) {
@@ -94,6 +95,17 @@ export function WatchlistButton({ symbol }: { symbol: string }) {
     }
   }
 
+  async function removeList(list: Watchlist) {
+    setBusy(true);
+    try {
+      await deleteWatchlistAction(list.id);
+      await load();
+      router.refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const menu =
     open && pos
       ? createPortal(
@@ -116,13 +128,13 @@ export function WatchlistButton({ symbol }: { symbol: string }) {
                   {lists.map((l) => {
                     const member = l.items.some((i) => i.symbol === symbol);
                     return (
-                      <li key={l.id}>
+                      <li key={l.id} className="group/li flex items-center gap-1 pr-1 transition hover:bg-surface">
                         <button
                           type="button"
                           disabled={busy}
                           onClick={() => toggle(l)}
                           className={cn(
-                            "flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-[13px] transition hover:bg-surface disabled:opacity-60",
+                            "flex min-w-0 flex-1 items-center justify-between gap-2 px-3 py-2 text-left text-[13px] transition disabled:opacity-60",
                             member ? "text-fg" : "text-fg-muted",
                           )}
                         >
@@ -132,6 +144,16 @@ export function WatchlistButton({ symbol }: { symbol: string }) {
                           ) : (
                             <IconPlus size={14} className="shrink-0 text-fg-subtle" />
                           )}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => removeList(l)}
+                          aria-label={`Delete ${l.name}`}
+                          title="Delete list"
+                          className="reduce-motion-safe flex size-6 shrink-0 items-center justify-center rounded-[4px] text-fg-subtle opacity-0 transition hover:text-neg focus-visible:opacity-100 group-hover/li:opacity-100 disabled:opacity-60"
+                        >
+                          <IconTrash size={13} />
                         </button>
                       </li>
                     );

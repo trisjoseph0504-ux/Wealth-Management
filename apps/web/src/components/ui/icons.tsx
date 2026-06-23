@@ -140,3 +140,6 @@ export const IconNote = (p: IconProps) => (
 export const IconCopy = (p: IconProps) => (
   <svg {...base(p)}><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2" /></svg>
 );
+export const IconPencil = (p: IconProps) => (
+  <svg {...base(p)}><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg>
+);
