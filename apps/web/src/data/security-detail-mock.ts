@@ -299,7 +299,7 @@ export function getSecurityDetail(
     week52High,
     returns,
     description: `${s.name} is a ${sectorLc} company tracked by Lewis Wealth Intelligence. The figures shown here are illustrative mock data for platform development — not a real quote or research.`,
-    thesis: `${s.name} screens as a core ${sectorLc} holding for the Lewis Family Office. Positioning is supported by exposure to ${theme}, a ${pe.toFixed(1)}× earnings multiple, and a beta of ${beta.toFixed(2)}. Lewis Intelligence would weigh this against valuation and concentration before sizing a position.`,
+    thesis: `${s.name} screens as a core ${sectorLc} holding for the Lewis Family Holdings. Positioning is supported by exposure to ${theme}, a ${pe.toFixed(1)}× earnings multiple, and a beta of ${beta.toFixed(2)}. Lewis Intelligence would weigh this against valuation and concentration before sizing a position.`,
     bull: [
       `${s.name} holds a durable position in ${sectorLc}, with demand tied to ${theme}.`,
       `Cash generation and margins support continued capital return and reinvestment.`,

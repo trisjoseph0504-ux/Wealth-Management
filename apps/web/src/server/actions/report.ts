@@ -24,7 +24,7 @@ export async function generatePortfolioReportAction(): Promise<{ filename: strin
 
   const lines: string[] = [];
   lines.push("LEWIS WEALTH INTELLIGENCE — PORTFOLIO REPORT");
-  lines.push("Lewis Family Office · Private Wealth");
+  lines.push("Lewis Family Holdings · Private Wealth");
   lines.push(`As of ${s.asOf}`);
   lines.push("=".repeat(60), "");
 

@@ -25,7 +25,7 @@ export default async function AlertsPage() {
         <SectionLabel>Intelligence</SectionLabel>
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-fg">Alerts &amp; Notifications</h1>
         <p className="text-[13px] text-fg-subtle">
-          Meaningful investment, risk, and portfolio events across the Lewis Family Office.
+          Meaningful investment, risk, and portfolio events across the Lewis Family Holdings.
         </p>
       </div>
 

@@ -23,7 +23,7 @@ export function PortfolioHeader({ s }: { s: PortfolioSummary }) {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="emerald">
-              <IconBuilding size={12} /> Lewis Family Office
+              <IconBuilding size={12} /> Lewis Family Holdings
             </Badge>
             <Badge tone="neutral">Consolidated · {s.holdingsCount} holdings</Badge>
           </div>

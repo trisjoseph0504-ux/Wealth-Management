@@ -139,7 +139,7 @@ export function SettingsClient({
 
       {/* Account */}
       <Card>
-        <CardHeader title="Account" subtitle="Profile for the Lewis Family Office" icon={<IconSettings size={16} />} />
+        <CardHeader title="Account" subtitle="Profile for the Lewis Family Holdings" icon={<IconSettings size={16} />} />
         <div className="grid gap-px bg-hairline sm:grid-cols-2">
           <div className="bg-surface px-5 py-4">
             <SectionLabel>Name</SectionLabel>

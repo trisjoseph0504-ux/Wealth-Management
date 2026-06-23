@@ -1,4 +1,4 @@
-/** Portfolio exposure — this security's position in the Lewis Family Office,
+/** Portfolio exposure — this security's position in the Lewis Family Holdings,
  *  or a clean empty state + add-to-watchlist CTA when it isn't held. */
 import type { ReactNode } from "react";
 import type { SecurityDetail } from "@/data/security-detail-mock";
@@ -12,7 +12,7 @@ export function PortfolioExposure({ d }: { d: SecurityDetail }) {
   const e = d.exposure;
   return (
     <Card className="flex h-full flex-col">
-      <CardHeader title="Portfolio Exposure" subtitle="Lewis Family Office" icon={<IconWallet size={16} />} />
+      <CardHeader title="Portfolio Exposure" subtitle="Lewis Family Holdings" icon={<IconWallet size={16} />} />
       {e ? (
         <div className="flex flex-1 flex-col gap-4 px-5 py-5">
           <div>

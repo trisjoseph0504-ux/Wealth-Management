@@ -60,7 +60,7 @@ async function main() {
   await db.delete(portfolios).where(eq(portfolios.userId, user.id));
   const pfRows = await db
     .insert(portfolios)
-    .values({ userId: user.id, name: "Lewis Family Office", baseCurrency: "USD", isDefault: true })
+    .values({ userId: user.id, name: "Lewis Family Holdings", baseCurrency: "USD", isDefault: true })
     .returning();
   const portfolio = pfRows[0];
   if (!portfolio) throw new Error("Failed to create portfolio");

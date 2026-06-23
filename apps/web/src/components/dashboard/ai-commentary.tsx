@@ -55,22 +55,30 @@ export function AiCommentary() {
       />
       <div className="flex flex-1 flex-col px-5 py-5">
         <div className="rounded-[8px] border border-hairline bg-inset/40 px-5 py-5">
-          {text ? (
+          {busy ? (
+            <div aria-live="polite" aria-busy="true">
+              <div className="mb-3 inline-flex items-center gap-2 text-[12px] text-fg-subtle">
+                <IconSparkles size={14} className="animate-pulse text-emerald" />
+                Analyzing your live portfolio…
+              </div>
+              <div className="space-y-2.5">
+                {["100%", "94%", "98%", "72%"].map((w, i) => (
+                  <div
+                    key={i}
+                    className="h-3 animate-pulse rounded-full bg-line-strong/40"
+                    style={{ width: w, animationDelay: `${i * 140}ms` }}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : text ? (
             <p className="text-[15px] leading-relaxed text-fg" style={{ fontFamily: "var(--font-serif)" }}>
               {text}
             </p>
           ) : (
             <p className="text-[15px] leading-relaxed text-fg-muted" style={{ fontFamily: "var(--font-serif)" }}>
-              {busy ? (
-                <span className="inline-flex items-center gap-2 text-fg-subtle">
-                  <IconSparkles size={14} className="animate-pulse" /> Synthesizing commentary from your holdings, allocation, and risk…
-                </span>
-              ) : (
-                <>
-                  <span className="text-fg">Generate commentary</span> to see how your holdings, allocation, and risk posture
-                  relate to current market conditions — in plain, advisor-grade language.
-                </>
-              )}
+              <span className="text-fg">Generate commentary</span> to see how your holdings, allocation, and risk posture
+              relate to today&apos;s moves — in plain, advisor-grade language.
             </p>
           )}
 

@@ -59,7 +59,7 @@ export function RiskSummary({ model }: { model: RiskModel }) {
     <Card className="overflow-hidden">
       <CardHeader
         title="Portfolio Risk Score"
-        subtitle={`Lewis Family Office · ${m.asOf}`}
+        subtitle={`Lewis Family Holdings · ${m.asOf}`}
         icon={<IconShield size={16} />}
         action={<Badge tone={TIER_TONE[m.riskTier]}>{m.riskTier}</Badge>}
       />

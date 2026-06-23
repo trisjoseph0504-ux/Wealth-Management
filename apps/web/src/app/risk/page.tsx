@@ -34,7 +34,7 @@ export default async function RiskPage() {
         <SectionLabel>Intelligence</SectionLabel>
         <h1 className="mt-1 text-xl font-semibold tracking-tight text-fg">Risk Analytics</h1>
         <p className="text-[13px] text-fg-subtle">
-          Portfolio-level risk intelligence and decision support across the Lewis Family Office.
+          Portfolio-level risk intelligence and decision support across the Lewis Family Holdings.
         </p>
       </div>
 
