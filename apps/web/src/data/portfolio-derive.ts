@@ -78,13 +78,17 @@ export function inferAssetClass(sec: Security | undefined): AssetClass {
   return "Equities";
 }
 
-function enrich(inputs: RawHolding[]): Holding[] {
+/** Live quote overlay: symbol → current price + day change (from the provider). */
+export type LiveQuoteMap = Record<string, { price: number; changePct: number }>;
+
+function enrich(inputs: RawHolding[], quotes?: LiveQuoteMap): Holding[] {
   const items = inputs.map((h): Holding => {
     const sec = getSecurity(h.symbol);
+    const live = quotes?.[h.symbol.toUpperCase()];
     const isCash = h.assetClass === "Cash" || h.symbol === "USD";
-    const price = sec?.price ?? (isCash ? 1 : h.avgCost);
+    const price = live?.price ?? sec?.price ?? (isCash ? 1 : h.avgCost);
     const name = sec?.name ?? (isCash ? "Cash & Money Market" : h.symbol);
-    const dayChangePct = isCash ? 0 : (sec?.changePct ?? 0);
+    const dayChangePct = isCash ? 0 : (live?.changePct ?? sec?.changePct ?? 0);
     const trend = sec?.trend ?? [price, price, price, price, price, price, price];
     const marketValue = h.quantity * price;
     const costValue = h.quantity * h.avgCost;
@@ -122,8 +126,8 @@ function aggregate(holdings: Holding[], key: "assetClass" | "sector"): Allocatio
     .sort((a, b) => b.value - a.value);
 }
 
-export function buildPortfolio(inputs: RawHolding[]): PortfolioView {
-  const holdings = enrich(inputs);
+export function buildPortfolio(inputs: RawHolding[], quotes?: LiveQuoteMap): PortfolioView {
+  const holdings = enrich(inputs, quotes);
   const totalValue = holdings.reduce((s, h) => s + h.marketValue, 0);
   const totalCost = holdings.reduce((s, h) => s + h.costValue, 0);
   const totalGain = totalValue - totalCost;

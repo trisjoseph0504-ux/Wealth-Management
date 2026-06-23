@@ -76,6 +76,10 @@ export function ScenarioAnalysis({
 
         {/* Selected scenario detail */}
         <div className="bg-surface px-5 py-5">
+          <div className="mb-4 border-b border-hairline pb-4">
+            <h3 className="text-[15px] font-semibold tracking-tight text-fg">{active.name}</h3>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-fg-subtle">{active.description}</p>
+          </div>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-fg-subtle">Modeled Impact</p>

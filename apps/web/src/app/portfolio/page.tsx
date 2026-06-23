@@ -5,6 +5,7 @@
  */
 import { listHoldingsAction } from "@/server/actions/holdings";
 import { buildPortfolio } from "@/data/portfolio-derive";
+import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { PortfolioHeader } from "@/components/portfolio/portfolio-header";
 import { PerformanceChart } from "@/components/portfolio/performance-chart";
 import { HoldingsTable } from "@/components/portfolio/holdings-table";
@@ -18,7 +19,8 @@ export const dynamic = "force-dynamic";
 
 export default async function PortfolioPage() {
   const raw = await listHoldingsAction();
-  const view = buildPortfolio(raw);
+  const quotes = await fetchHoldingQuotes(raw.map((h) => h.symbol));
+  const view = buildPortfolio(raw, quotes);
 
   return (
     <div className="space-y-6">

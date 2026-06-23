@@ -10,7 +10,7 @@ import { useMemo, useState } from "react";
 import { buildSeries, type SecurityDetail } from "@/data/security-detail-mock";
 import { cn } from "@/lib/cn";
 import { Card, CardHeader } from "@/components/ui/card";
-import { Money, Percent } from "@/components/ui/financial";
+import { Money, Percent, Delta } from "@/components/ui/financial";
 import { Badge } from "@/components/ui/primitives";
 import { InteractiveChart } from "@/components/ui/interactive-chart";
 import { rangePointLabels } from "@/lib/chart-time";
@@ -27,6 +27,8 @@ export function SecurityChart({ d }: { d: SecurityDetail }) {
 
   const stroke = up ? "var(--color-emerald)" : "var(--color-neg)";
   const fmtPrice = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  // Dollar change over the selected window: price now minus the window's start price.
+  const periodChange = d.price - d.price / (1 + range.returnPct / 100);
 
   return (
     <Card>
@@ -40,8 +42,10 @@ export function SecurityChart({ d }: { d: SecurityDetail }) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-end gap-3">
             <Money value={d.price} className="text-2xl font-semibold tracking-tight text-fg" />
-            <span className="mb-1 inline-flex items-center gap-1.5 text-[12px] text-fg-subtle">
-              {range.label} <Percent value={range.returnPct} withGlyph className="font-medium" />
+            <span className="mb-1 inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[12px] text-fg-subtle">
+              <span className="font-medium text-fg-muted">{range.label}</span>
+              <Delta value={periodChange} className="text-[12px] font-medium" />
+              <Percent value={range.returnPct} withGlyph className="font-medium" />
             </span>
           </div>
           <div className="flex items-center gap-1 rounded-[6px] border border-hairline bg-inset p-0.5">
