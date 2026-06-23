@@ -11,18 +11,37 @@ export interface DonutDatum {
   value: number;
 }
 
-/** Categorical ramp: emerald → teal → slate. Never introduces gold/yellow. */
+/**
+ * Categorical palette for allocation slices. Broadened from the original
+ * emerald→teal→slate ramp into a wider cool-toned set (greens, teals, cyans,
+ * blues, indigos, violets, magentas, slates), interleaved so adjacent slices
+ * contrast. Still never introduces yellow/gold (DESIGN_SYSTEM.md §6).
+ */
 export const ALLOCATION_COLORS = [
-  "#10b981",
-  "#2bb39b",
-  "#3f9bb0",
-  "#5183b3",
-  "#6e8ba8",
-  "#8a93a3",
+  "#10b981", // emerald
+  "#3b82c4", // blue
+  "#b5589f", // magenta
+  "#2bb39b", // teal
+  "#6d6fd4", // indigo
+  "#cf6a90", // rose
+  "#1aa6b5", // cyan
+  "#9560c4", // violet
+  "#5183b3", // steel blue
+  "#3f9bb0", // teal-blue
+  "#6e8ba8", // slate
+  "#8a93a3", // slate gray
 ] as const;
 
+/**
+ * Color for the slice at `index`. Uses the curated palette first; beyond it,
+ * spreads further hues by the golden angle (dodging the excluded warm
+ * yellow/gold band) so any number of holdings stays visually distinct.
+ */
 export function colorAt(index: number): string {
-  return ALLOCATION_COLORS[index % ALLOCATION_COLORS.length]!;
+  if (index < ALLOCATION_COLORS.length) return ALLOCATION_COLORS[index]!;
+  let hue = (index * 137.508) % 360; // golden angle → well-spread hues
+  if (hue >= 40 && hue <= 75) hue = (hue + 60) % 360; // skip yellow/gold
+  return `hsl(${Math.round(hue)} 45% 55%)`;
 }
 
 export function Donut({
