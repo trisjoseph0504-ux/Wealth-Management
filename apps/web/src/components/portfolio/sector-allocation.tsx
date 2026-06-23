@@ -2,7 +2,7 @@
 import type { Allocation } from "@/data/portfolio-derive";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Money } from "@/components/ui/financial";
-import { colorAt } from "@/components/ui/donut";
+import { colorAt } from "@/components/ui/donut-colors";
 import { IconLayers } from "@/components/ui/icons";
 
 export function SectorAllocation({ sectorAllocation }: { sectorAllocation: Allocation[] }) {

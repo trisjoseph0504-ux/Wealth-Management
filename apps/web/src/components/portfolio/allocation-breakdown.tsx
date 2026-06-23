@@ -2,7 +2,8 @@
 import type { Holding } from "@/data/portfolio-mock";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Money } from "@/components/ui/financial";
-import { Donut, colorAt } from "@/components/ui/donut";
+import { Donut } from "@/components/ui/donut";
+import { colorAt } from "@/components/ui/donut-colors";
 import { IconPie } from "@/components/ui/icons";
 
 export function AllocationBreakdown({ holdings }: { holdings: Holding[] }) {
@@ -17,7 +18,7 @@ export function AllocationBreakdown({ holdings }: { holdings: Holding[] }) {
       <div className="flex flex-1 flex-col items-center gap-6 px-5 py-5 sm:flex-row">
         <div className="mx-auto shrink-0">
           <Donut
-            data={slices.map((h, i) => ({ key: `${h.symbol}-${i}`, label: h.symbol, value: h.weightPct }))}
+            data={slices.map((h, i) => ({ key: `${h.symbol}-${i}`, label: h.symbol, value: h.weightPct, sub: h.name }))}
             center={
               <>
                 <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-fg-subtle">Total</span>
@@ -35,12 +36,11 @@ export function AllocationBreakdown({ holdings }: { holdings: Holding[] }) {
               <div className="flex items-center justify-between gap-2 text-[13px]">
                 <span className="flex min-w-0 items-center gap-2 text-fg">
                   <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: colorAt(i) }} />
-                  <span className="shrink-0 font-medium">{h.symbol}</span>
-                  <span className="truncate text-fg-subtle">{h.name}</span>
+                  <span className="truncate font-medium">{h.symbol}</span>
                 </span>
                 <span className="flex shrink-0 items-center gap-3 whitespace-nowrap">
                   <Money value={h.marketValue} compact className="text-fg-muted" />
-                  <span className="tnum w-12 text-right font-medium text-fg">{h.weightPct.toFixed(1)}%</span>
+                  <span className="tnum w-14 text-right font-medium text-fg">{h.weightPct.toFixed(1)}%</span>
                 </span>
               </div>
               <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-inset">

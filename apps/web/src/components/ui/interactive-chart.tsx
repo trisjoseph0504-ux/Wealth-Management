@@ -114,7 +114,11 @@ export function InteractiveChart({
         height={height}
         className="block touch-none select-none"
         onPointerMove={onMove}
-        onPointerLeave={() => setHover(null)}
+        onPointerDown={onMove}
+        onPointerLeave={(e) => {
+          // Mouse: clear on leave. Touch/pen: keep the readout after a tap.
+          if (e.pointerType === "mouse") setHover(null);
+        }}
       >
         <defs>
           {series.map((s, si) =>
