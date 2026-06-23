@@ -2,10 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { LwWordmark } from "@/components/shell/logo";
 import { NavList } from "@/components/shell/nav-list";
 import { cn } from "@/lib/cn";
-import { IconMenu, IconClose } from "@/components/ui/icons";
+import { IconMenu, IconClose, IconSettings } from "@/components/ui/icons";
 
 /**
  * Hamburger trigger + slide-over drawer. Phone-only — shown below `md`; at md+
@@ -102,6 +103,16 @@ export function MobileNav() {
               <nav className="flex-1 overflow-y-auto px-3 py-5">
                 <NavList onNavigate={() => setOpen(false)} />
               </nav>
+              <div className="shrink-0 border-t border-hairline p-3">
+                <Link
+                  href="/settings"
+                  onClick={() => setOpen(false)}
+                  className="reduce-motion-safe flex w-full items-center gap-3 rounded-[6px] px-3 py-2.5 text-[13px] font-medium text-fg-muted transition hover:bg-surface-2 hover:text-fg"
+                >
+                  <IconSettings size={17} className="text-fg-subtle" />
+                  Settings
+                </Link>
+              </div>
             </aside>
           </div>,
           document.body,
