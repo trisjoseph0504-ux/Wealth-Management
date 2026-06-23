@@ -2,7 +2,7 @@
 
 /** Market movers — tabbed gainers / losers / most active over the universe. */
 import { useState } from "react";
-import { movers, type Security } from "@/data/markets-mock";
+import { type Security } from "@/data/markets-mock";
 import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/format";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -19,7 +19,13 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
-export function MarketMovers() {
+interface Movers {
+  gainers: Security[];
+  losers: Security[];
+  mostActive: Security[];
+}
+
+export function MarketMovers({ movers }: { movers: Movers }) {
   const [tab, setTab] = useState<TabKey>("gainers");
   const rows = movers[tab];
 

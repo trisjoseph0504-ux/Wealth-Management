@@ -5,7 +5,7 @@
  * data shape. The intensity ramp is a documented viz palette (DESIGN_SYSTEM §6).
  */
 import Link from "next/link";
-import { heatmap } from "@/data/markets-mock";
+import type { HeatmapGroup } from "@/server/market/markets-live";
 import { Card, CardHeader } from "@/components/ui/card";
 import { IconGrid } from "@/components/ui/icons";
 
@@ -18,7 +18,7 @@ function heatStyle(changePct: number): string {
     : `rgba(242, 85, 90, ${alpha})`;
 }
 
-export function MarketHeatmap() {
+export function MarketHeatmap({ heatmap }: { heatmap: HeatmapGroup[] }) {
   return (
     <Card>
       <CardHeader

@@ -1,10 +1,10 @@
 /** Sector performance — ranked diverging bars (market-cap weighted day change). */
-import { sectorPerformance } from "@/data/markets-mock";
+import type { SectorPerf } from "@/data/markets-mock";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Money, Percent } from "@/components/ui/financial";
 import { IconLayers } from "@/components/ui/icons";
 
-export function SectorPerformance() {
+export function SectorPerformance({ sectorPerformance }: { sectorPerformance: SectorPerf[] }) {
   const maxAbs = Math.max(...sectorPerformance.map((s) => Math.abs(s.changePct)), 0.5);
 
   return (

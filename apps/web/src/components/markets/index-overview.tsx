@@ -11,7 +11,7 @@ export function IndexOverview() {
     <Card>
       <CardHeader
         title="Major Indices"
-        subtitle="Global benchmarks · delayed"
+        subtitle="Global benchmarks · indicative"
         icon={<IconGlobe size={16} />}
       />
       <div className="grid grid-cols-1 gap-px bg-hairline sm:grid-cols-2 lg:grid-cols-3">
