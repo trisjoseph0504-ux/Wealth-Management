@@ -35,7 +35,7 @@ export default async function PortfolioPage() {
       <HoldingsTable holdings={view.holdings} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <AllocationBreakdown assetAllocation={view.assetAllocation} />
+        <AllocationBreakdown holdings={view.holdings} />
         <SectorAllocation sectorAllocation={view.sectorAllocation} />
       </div>
 
