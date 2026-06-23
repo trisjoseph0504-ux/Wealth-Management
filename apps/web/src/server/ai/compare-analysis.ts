@@ -2,21 +2,17 @@
  * Real Claude-powered "winner" analysis for the Compare page. Sends the selected
  * securities' metrics + bull/bear cases to the Anthropic API and returns a
  * grounded, plain-language comparison. Server-only (the API key never leaves the
- * server). Returns null when no ANTHROPIC_API_KEY is set or the call fails, so
- * callers fall back to the rules-based generator.
+ * server). Returns null only when no ANTHROPIC_API_KEY is set or the call fails,
+ * so callers fall back to the rules-based generator.
  */
 import Anthropic from "@anthropic-ai/sdk";
 import type { CompareCard } from "@/server/actions/compare";
 
 const SYSTEM = `You are an equity analyst writing a brief, plain-language comparison for an investor weighing a few stocks.
 
-Format your reply EXACTLY like this:
-- First line: "WINNER: <TICKER>" — the single strongest all-rounder among the options.
-- Then a blank line.
-- Then 2–3 short paragraphs (no markdown, no bullets, no headings).
-
-Content rules:
-- Explain why the winner leads, the market scenarios where each name would thrive, and fold in each name's bull/bear case where provided.
+- Write 2–3 short paragraphs. No markdown, no bullet points, no headings.
+- In your very first sentence, name the single strongest all-rounder by its ticker (e.g. "AAPL screens as the strongest all-rounder...").
+- Explain why it leads, the market scenarios where each name would thrive, and fold in each name's bull/bear case where provided.
 - Ground every claim in the figures provided and reference tickers. Do NOT invent numbers, prices, or external news.
 - Informational only: observations and considerations, never a recommendation to buy or sell any security.`;
 
@@ -58,18 +54,25 @@ export async function aiCompareAnalysis(cards: CompareCard[]): Promise<CompareIn
     const raw = block && block.type === "text" ? block.text.trim() : "";
     if (!raw) return null;
 
-    const match = raw.match(/^WINNER:\s*([A-Za-z0-9.\-]+)/i);
-    const claimed = match ? match[1]!.toUpperCase() : "";
-    const valid = cards.find((c) => c.symbol.toUpperCase() === claimed);
+    // Winner: an explicit "winner/strongest TICKER" cue if present, else the first
+    // ticker mentioned near the top, else the first card. Never fail on this.
+    const cue = raw.match(/(?:winner|strongest)[^A-Za-z0-9]{0,12}([A-Za-z][A-Za-z0-9.\-]{0,5})/i);
+    let winner = cue && cards.find((c) => c.symbol.toUpperCase() === cue[1]!.toUpperCase())?.symbol;
+    if (!winner) {
+      const lead = raw.slice(0, 200).toUpperCase();
+      winner = cards.find((c) => lead.includes(c.symbol.toUpperCase()))?.symbol;
+    }
+    if (!winner) winner = cards[0]!.symbol;
 
-    const body = raw.replace(/^WINNER:\s*[A-Za-z0-9.\-]+\s*/i, "").trim();
+    // Drop a leading "WINNER:"/"Strongest:" label line if the model emitted one.
+    let body = raw.replace(/^\s*\**\s*(?:winner|strongest)\s*\**\s*[:\-—]\s*[A-Za-z0-9.\-]+\s*\n+/i, "").trim();
+    if (!body) body = raw;
     const paragraphs = body
       .split(/\n{2,}/)
       .map((s) => s.replace(/\s+/g, " ").trim())
       .filter(Boolean);
-    if (paragraphs.length === 0) return null;
 
-    return { winner: (valid ?? cards[0]!).symbol, paragraphs };
+    return { winner, paragraphs: paragraphs.length ? paragraphs : [body] };
   } catch {
     return null;
   }
