@@ -9,7 +9,7 @@ import { buildPortfolio } from "@/data/portfolio-derive";
 import { fetchHoldingQuotes } from "@/server/market/holding-quotes";
 import { buildRiskAnalysis } from "@/data/risk-mock";
 import { buildMarketCommentary } from "@/data/commentary";
-import { portfolio as demoTrend, type PortfolioSummary, type AllocationSlice, type RiskSnapshot as RiskSnapshotData } from "@/data/mock";
+import { portfolio as demoTrend, type PortfolioSummary, type RiskSnapshot as RiskSnapshotData } from "@/data/mock";
 import { PortfolioOverview } from "@/components/dashboard/portfolio-overview";
 import { AllocationSection } from "@/components/dashboard/allocation-section";
 import { WatchlistPreview } from "@/components/dashboard/watchlist-preview";
@@ -45,13 +45,6 @@ export default async function DashboardPage() {
     valueTrend: s.totalValue > 0 ? demoTrend.valueTrend : [0, 0, 0, 0, 0, 0, 0], // flat when unfunded
   };
 
-  const allocation: AllocationSlice[] = view.assetAllocation.map((a) => ({
-    key: a.label.toLowerCase().replace(/\s+/g, "_"),
-    label: a.label,
-    weightPct: a.weightPct,
-    valueUsd: a.value,
-  }));
-
   const m = risk.riskModel;
   const riskSnapshot: RiskSnapshotData = {
     riskScore: m.riskScore,
@@ -83,7 +76,7 @@ export default async function DashboardPage() {
 
       {/* Row 2 — allocation + watchlist */}
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <AllocationSection allocation={allocation} />
+        <AllocationSection holdings={view.holdings} />
         <WatchlistPreview />
       </div>
 
