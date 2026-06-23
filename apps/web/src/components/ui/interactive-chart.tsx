@@ -59,6 +59,16 @@ export function InteractiveChart({
     return () => ro.disconnect();
   }, []);
 
+  // Tap/click outside dismisses a tapped-open readout (touch has no pointerleave).
+  useEffect(() => {
+    if (hover == null) return;
+    const onDocDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setHover(null);
+    };
+    document.addEventListener("pointerdown", onDocDown);
+    return () => document.removeEventListener("pointerdown", onDocDown);
+  }, [hover]);
+
   const n = series[0]?.values.length ?? 0;
   const plotW = Math.max(1, width - M.left - M.right);
   const plotH = Math.max(1, height - M.top - M.bottom);

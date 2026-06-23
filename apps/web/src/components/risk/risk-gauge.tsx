@@ -7,7 +7,8 @@
  * score climbs), and the number is tinted to match the level. Common pattern in
  * financial dashboards. Respects prefers-reduced-motion.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import { cn } from "@/lib/cn";
 
 const R = 84;
 const ARC = Math.PI * R; // length of the semicircle stroke
@@ -19,7 +20,16 @@ export function riskColor(score: number): string {
   return `hsl(${Math.round(hue)} 72% 46%)`;
 }
 
-export function RiskGauge({ score }: { score: number }) {
+export function RiskGauge({
+  score,
+  width = 200,
+  numberClass = "text-4xl",
+}: {
+  score: number;
+  width?: number;
+  numberClass?: string;
+}) {
+  const gid = useId().replace(/:/g, "");
   const target = Math.max(0, Math.min(100, score)) / 100;
   const [fill, setFill] = useState(0);
   const [display, setDisplay] = useState(0);
@@ -56,10 +66,10 @@ export function RiskGauge({ score }: { score: number }) {
   const color = riskColor(score);
 
   return (
-    <div className="relative h-[110px] w-[200px]">
+    <div className="relative" style={{ width, height: width * 0.55 }}>
       <svg viewBox="0 0 200 110" className="h-full w-full">
         <defs>
-          <linearGradient id="risk-grad" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={`risk-grad-${gid}`} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="hsl(145 68% 42%)" />
             <stop offset="50%" stopColor="hsl(50 88% 52%)" />
             <stop offset="100%" stopColor="hsl(5 78% 52%)" />
@@ -71,7 +81,7 @@ export function RiskGauge({ score }: { score: number }) {
         <path
           d="M16 102 A84 84 0 0 1 184 102"
           fill="none"
-          stroke="url(#risk-grad)"
+          stroke={`url(#risk-grad-${gid})`}
           strokeWidth="12"
           strokeLinecap="round"
           strokeDasharray={ARC}
@@ -80,7 +90,7 @@ export function RiskGauge({ score }: { score: number }) {
       </svg>
       <div className="absolute inset-x-0 bottom-1 flex flex-col items-center">
         <span
-          className="tnum text-4xl font-semibold tracking-tight"
+          className={cn("tnum font-semibold tracking-tight", numberClass)}
           style={{
             color,
             opacity: shown ? 1 : 0,

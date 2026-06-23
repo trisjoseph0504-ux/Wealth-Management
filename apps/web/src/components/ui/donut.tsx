@@ -5,7 +5,7 @@
  * ramp (no yellow, per DESIGN_SYSTEM.md §6). Center renders a supplied label.
  * Hovering or tapping a slice reveals which holding it is (label + sub + share).
  */
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { colorAt, type DonutDatum } from "@/components/ui/donut-colors";
 
 export type { DonutDatum } from "@/components/ui/donut-colors";
@@ -35,6 +35,17 @@ export function Donut({
     const rect = wrapRef.current?.getBoundingClientRect();
     if (rect) setPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
   }
+
+  // Tap/click anywhere outside the donut dismisses a tapped-open tooltip (mobile
+  // has no "pointer leave", so without this there's no way to clear it).
+  useEffect(() => {
+    if (active == null) return;
+    const onDocDown = (e: PointerEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setActive(null);
+    };
+    document.addEventListener("pointerdown", onDocDown);
+    return () => document.removeEventListener("pointerdown", onDocDown);
+  }, [active]);
 
   // Precompute each segment's dash length + offset.
   let offset = 0;

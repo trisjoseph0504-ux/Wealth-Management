@@ -9,33 +9,15 @@ import { Card, CardHeader } from "@/components/ui/card";
 import { Money, Percent } from "@/components/ui/financial";
 import { Badge } from "@/components/ui/primitives";
 import { IconShield } from "@/components/ui/icons";
+import { RiskGauge } from "@/components/risk/risk-gauge";
 
-function RiskGauge({ score }: { score: number }) {
-  // Semicircle gauge, 180° sweep. Token-colored emerald arc; no yellow zone.
-  const r = 56;
-  const c = Math.PI * r; // half-circumference
-  const pct = Math.min(Math.max(score, 0), 100) / 100;
-  return (
-    <div className="relative h-[78px] w-[140px]">
-      <svg viewBox="0 0 140 78" className="h-full w-full">
-        <path d="M12 72 A58 58 0 0 1 128 72" fill="none" stroke="var(--color-inset)" strokeWidth="10" strokeLinecap="round" />
-        <path
-          d="M12 72 A58 58 0 0 1 128 72"
-          fill="none"
-          stroke="var(--color-emerald)"
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - pct)}
-        />
-      </svg>
-      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center">
-        <span className="tnum text-2xl font-semibold text-fg">{score}</span>
-        <span className="text-[10px] uppercase tracking-[0.14em] text-fg-subtle">Risk Score</span>
-      </div>
-    </div>
-  );
-}
+// Same tier→tone mapping as the Risk Analytics page, so a hot book reads red here too.
+const TIER_TONE: Record<string, "emerald" | "info" | "warn" | "danger"> = {
+  Conservative: "emerald",
+  Balanced: "info",
+  Growth: "warn",
+  Aggressive: "danger",
+};
 
 function Metric({ label, value, note }: { label: string; value: ReactNode; note?: string }) {
   return (
@@ -54,11 +36,11 @@ export function RiskSnapshot({ risk }: { risk: RiskSnapshotData }) {
         title="Risk Snapshot"
         subtitle="Trailing 12 months"
         icon={<IconShield size={16} />}
-        action={<Badge tone="info">{risk.tier}</Badge>}
+        action={<Badge tone={TIER_TONE[risk.tier] ?? "info"}>{risk.tier}</Badge>}
       />
       <div className="flex flex-1 flex-col gap-4 px-5 py-5">
-        <div className="flex items-center justify-center">
-          <RiskGauge score={risk.riskScore} />
+        <div className="flex items-center justify-center pt-1">
+          <RiskGauge score={risk.riskScore} width={168} numberClass="text-3xl" />
         </div>
         <div className="grid grid-cols-2 gap-2.5">
           <Metric label="Volatility" value={<span className="tnum">{risk.volatilityPct.toFixed(1)}%</span>} note="Annualized σ" />
