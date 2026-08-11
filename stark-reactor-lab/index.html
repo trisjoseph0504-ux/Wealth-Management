@@ -9,7 +9,7 @@
 <body>
 <header class="top">
  <div class="brand"><div class="logo"></div><div><b>STARK REACTOR LAB</b><small>J.A.R.V.I.S. // CAD TEARDOWN & MATERIAL ANALYSIS</small></div></div>
- <div class="sys"><i></i><span id="sysText">SYSTEM NOMINAL</span></div>
+ <div class="sys"><i></i><span id="sysText">LOADING 3D ENGINE</span></div>
 </header>
 <div class="shell">
  <div class="pagehead"><div><div class="eyebrow">ARC REACTOR / COMPONENT-LEVEL HOLOGRAPHIC TEARDOWN</div><h1>REACTOR ENGINEERING EXPLORER V4</h1><p>Identify it at a glance. Click a subsystem, drill into it, then isolate individual physical parts.</p></div><div class="legend"><span><i class="c"></i>FILM-CONFIRMED</span><span><i class="v"></i>VISIBLE / PROP-BASED</span><span><i class="n"></i>ENGINEERING INFERENCE</span></div></div>
@@ -24,7 +24,7 @@
     <div class="crumb" id="crumb"><button data-root="1">ARC REACTOR</button><span>/</span><strong id="crumbText">ASSEMBLY</strong></div>
     <div class="hover" id="hover"></div>
     <div class="callouts" id="callouts"></div>
-    <div class="fallback" id="fallback"><div><b>3D ENGINE OFFLINE</b><p>Reload this page with an internet connection.</p></div></div>
+    <div class="fallback" id="fallback"><div><b>3D ENGINE COULD NOT LOAD</b><p id="fallbackText">A browser or network policy blocked every 3D engine source. This is not a Wi‑Fi status check.</p></div></div>
     <div class="bottomtools">
      <div class="toolset"><button id="identify" class="active">IDENTIFY MODE</button><button id="front">FRONT</button><button id="section">SIDE SECTION</button><button id="xray">X-RAY</button><button id="isolate">ISOLATE</button><button id="reset">RESET</button></div>
      <div class="range"><label><span>EXPLODED TEARDOWN</span><b id="explodeText">0%</b></label><input id="explode" type="range" min="0" max="100" value="0"></div>
@@ -45,12 +45,45 @@
   </aside>
  </div>
  <div class="lowgrid">
-  <section class="panel"><div class="bar"><div><div class="kicker">LOCAL COMMAND CONTROL</div><strong>J.A.R.V.I.S. TEARDOWN COMMANDS</strong></div><div class="readout">LOCAL UI / NO CLOUD AI</div></div><div class="cmdrow"><input id="cmd" placeholder="Try: open coil array, coil 4, isolate winding, explode 80, front view, mark vi"><button id="run">EXECUTE</button></div><div class="cmdlog" id="cmdlog">JARVIS&gt; CAD archive ready. Identify mode enabled.</div></section>
+  <section class="panel"><div class="bar"><div><div class="kicker">LOCAL COMMAND CONTROL</div><strong>J.A.R.V.I.S. TEARDOWN COMMANDS</strong></div><div class="readout">LOCAL UI / NO CLOUD AI</div></div><div class="cmdrow"><input id="cmd" placeholder="Try: open coil array, coil 4, isolate winding, explode 80, front view, mark vi"><button id="run">EXECUTE</button></div><div class="cmdlog" id="cmdlog">JARVIS&gt; Loading 3D engine...</div></section>
   <section class="panel"><div class="bar"><div><div class="kicker">TEARDOWN DEPTH</div><strong>INTERACTION HIERARCHY</strong></div><div class="readout">3 LEVELS</div></div><div class="levels"><div class="level"><b>01 // ASSEMBLY</b><p>Recognize all major reactor systems at once.</p></div><div class="level"><b>02 // SUBSYSTEM</b><p>Open core, coil array, aperture, housing, bus or thermal stage.</p></div><div class="level"><b>03 // PHYSICAL PART</b><p>Isolate individual windings, clamps, fasteners, rings, mesh and contacts.</p></div><div class="level"><b>VIEW // CAD</b><p>Front inspection, side section, exploded stack and X-ray.</p></div></div></section>
  </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="./v4-data-classic.js"></script>
-<script src="./v4-app-a.js"></script>
-<script src="./v4-app-b.js"></script>
+<script>
+(function(){
+  const threeSources=[
+    'https://raw.githack.com/mrdoob/three.js/r128/build/three.min.js',
+    'https://unpkg.com/three@0.128.0/build/three.min.js',
+    'https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js'
+  ];
+  const appScripts=['./v4-data-classic.js','./v4-app-a.js','./v4-app-b.js'];
+  function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>{s.remove();reject(new Error('Blocked: '+src))};document.head.appendChild(s)})}
+  async function boot(){
+    let loaded=false,errors=[];
+    for(const src of threeSources){
+      try{await loadScript(src);if(window.THREE){loaded=true;break}}catch(err){errors.push(err.message)}
+    }
+    if(!loaded){
+      console.error('Three.js load failures',errors);
+      document.getElementById('fallback').style.display='grid';
+      document.getElementById('sysText').textContent='3D ENGINE BLOCKED';
+      document.getElementById('modelCode').textContent='ENGINE LOAD FAILURE';
+      document.getElementById('cmdlog').textContent='JARVIS> Browser/network policy blocked all configured 3D engine sources.';
+      return;
+    }
+    try{
+      for(const src of appScripts) await loadScript(src);
+      document.getElementById('sysText').textContent='SYSTEM NOMINAL';
+      document.getElementById('cmdlog').textContent='JARVIS> CAD archive ready. Identify mode enabled.';
+    }catch(err){
+      console.error(err);
+      document.getElementById('fallback').style.display='grid';
+      document.getElementById('sysText').textContent='APP SCRIPT FAILURE';
+      document.getElementById('fallbackText').textContent='The 3D engine loaded, but one of the local reactor scripts failed to initialize.';
+    }
+  }
+  boot();
+})();
+</script>
 </body></html>
